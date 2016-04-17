@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=300">
+    <title>WordClock Settings</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body onload="loadSettings();">
+
+<script src="jscolor.js"></script>
+
+<div class="header">WordClock Settings</div>
+
+<div class="outer_frame">
+    <p>Farben</p>
+    <div class="buttondiv">
+    <button
+        id = "foregroundColorButton"
+        class="colorbutton jscolor {width:150,onFineChange:'newForeground=this.toString()',valueElement:null,value:'ffffff'}">
+        wird geladen...
+    </button>
+    </div>
+
+    <div class="buttondiv">
+    <button
+        id = "backgroundColorButton"
+        class="colorbutton jscolor {width:150,onFineChange:'newBackground=this.toString()',valueElement:null,value:'000000'}">
+        wird geladen...
+    </button>
+    </div>
+
+    <div class="buttondiv">
+    <button
+        id = "secondsColorButton"
+        class="colorbutton jscolor {width:150,onFineChange:'newSeconds=this.toString()',valueElement:null,value:'400020'}">
+        wird geladen...
+    </button>
+    </div>
+
+    <div class="buttondiv" style="margin-top:25px;">
+    <button class="colorbutton" onclick="saveConfig()">speichern</button>
+    </div>
+</div>
+
+<div class="outer_frame">
+    <p>Zeitserver</p>
+    <input type="text" class="ntp_input" id="ntpserver" value="wird geladen..." onClick="this.setSelectionRange(0, this.value.length)">
+    <div class="buttondiv">
+    <button class="colorbutton" onclick="saveNtpServer()">speichern</button>
+    </div>
+</div>
+
+<div class="outer_frame">
+    <p>Test</p>
+    <div class="buttondiv">
+    <button id="matrixbutton" class="colorbutton" style="color:#00FF00;background:#000000;" onclick="toggleMatrix()">
+        Bildschirmschoner Matrix
+    </button>
+    </div>
+
+    <div class="buttondiv">
+    <button id="heartbutton" class="colorbutton" style="color:#FF0000;background:#000000;" onclick="toggleHeart()">
+        Bildschirmschoner Herz
+    </button>
+    </div>
+
+    <div class="buttondiv">
+    <button id="starsbutton" class="colorbutton" style="color:#FFFFFF;background:#000000;" onclick="toggleStars()">
+        Bildschirmschoner Sterne
+    </button>
+    </div>
+</div>
+
+
+<script>
+
+    var lastBackground = '';
+    var newBackground = '';
+    var lastForeground = '';
+    var newForeground = '';
+    var lastSeconds = '';
+    var newSeconds = '';
+
+    var timer = setTimeout(sendColorTimer, 250);
+
+    var matrixState = 0;
+    var heartState = 0;
+    var starsState = 0;
+
+    function toggleMatrix()
+    {
+        if(matrixState == 0)
+        {
+            matrixState = 1;
+            document.getElementById('matrixbutton').style.color = '#000000';
+            document.getElementById('matrixbutton').style.background = '#00FF00';
+        }
+        else
+        {
+            matrixState = 0;
+            document.getElementById('matrixbutton').style.color = '#00FF00';
+            document.getElementById('matrixbutton').style.background = '#000000';
+        }
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://WordClock.local/matrix?state=" + matrixState, true);
+        xhttp.send();
+    }
+
+    function toggleHeart()
+    {
+        if(heartState == 0)
+        {
+            heartState = 1;
+            document.getElementById('heartbutton').style.color = '#000000';
+            document.getElementById('heartbutton').style.background = '#FF0000';
+        }
+        else
+        {
+            heartState = 0;
+            document.getElementById('heartbutton').style.color = '#FF0000';
+            document.getElementById('heartbutton').style.background = '#000000';
+        }
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://WordClock.local/heart?state=" + heartState, true);
+        xhttp.send();
+    }
+
+    function toggleStars()
+    {
+        if(starsState == 0)
+        {
+            starsState = 1;
+            document.getElementById('starsbutton').style.color = '#000000';
+            document.getElementById('starsbutton').style.background = '#FFFFFF';
+        }
+        else
+        {
+            starsState = 0;
+            document.getElementById('starsbutton').style.color = '#FFFFFF';
+            document.getElementById('starsbutton').style.background = '#000000';
+        }
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://WordClock.local/stars?state=" + starsState, true);
+        xhttp.send();
+    }
+
+    function updateButton(id, text, r, g, b)
+    {
+        button = document.getElementById(id);
+        button.jscolor.fromRGB(r, g, b);
+        button.innerHTML = text;
+        return button.jscolor.toString();
+    }
+    
+    function loadColors()
+    {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+            if(xhttp.readyState == 4 && xhttp.status == 200)
+            {
+                console.log("received " + xhttp.responseText);
+                var c = xhttp.responseText.split(",");
+                newBackground = updateButton('backgroundColorButton', 'Hintergrund', c[0], c[1], c[2]);
+                newForeground = updateButton('foregroundColorButton', 'Vordergrund', c[3], c[4], c[5]);
+                newSeconds = updateButton('secondsColorButton', 'Sekunden', c[6], c[7], c[8]);
+            }
+        };
+        xhttp.open("GET", "http://WordClock.local/getcolors", true);
+        xhttp.send();
+    }
+
+    function loadNtpServer()
+    {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+            if(xhttp.readyState == 4 && xhttp.status == 200)
+            {
+                console.log("received " + xhttp.responseText);
+                document.getElementById('ntpserver').value = xhttp.responseText;
+            }
+        };
+        xhttp.open("GET", "http://WordClock.local/getntpserver", true);
+        xhttp.send();
+    }
+
+    function sendColorTimer()
+    {
+        var update = false;
+
+        if(newBackground != '' && newBackground != lastBackground)
+        {
+            lastBackground = newBackground;
+            update = true;
+        }
+        if(newForeground != '' && newForeground != lastForeground)
+        {
+            lastForeground = newForeground;
+            update = true;
+        }
+        if(newSeconds != '' && newSeconds != lastSeconds)
+        {
+            lastSeconds = newSeconds;
+            update = true;
+        }
+
+        if(newSeconds == '' || newBackground == '' || newForeground == '')
+        {
+            update = false;
+        }
+
+        if(update == true)
+        {
+            var request = "http://WordClock.local/setcolor?" 
+                + "bg=" + newBackground 
+                + "&fg=" + newForeground 
+                + "&s=" + newSeconds;
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", request, true);
+            xhttp.send();
+        }
+
+        timer = setTimeout(sendColorTimer, 250);
+    }
+
+    function saveConfig()
+    {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://WordClock.local/saveconfig", true);
+        xhttp.send();
+    }
+
+    function isValidIP(ip)
+    {
+        var s = ip.split('.');
+        if(s.length != 4) return false;
+        for(var i=0; i<3; i++)
+        {
+            if(s[i] == '') return false;
+            if(isNaN(s[i])) return false;
+            var n = parseInt(s[i]);
+            if(n < 0 || n > 255) return false;
+        }
+        return true;
+    }
+
+    function saveNtpServer()
+    {
+        var server = document.getElementById('ntpserver').value;
+        if(!isValidIP(server))
+        {
+            alert("Die IP ist ungültig.");
+            return;
+        }
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://WordClock.local/setntpserver?ip=" + server, true);
+        xhttp.send();
+    }
+
+    function loadSettings()
+    {
+        loadColors();
+        loadNtpServer();
+    }
+    
+</script>
+
+
+</body>
+</html>
