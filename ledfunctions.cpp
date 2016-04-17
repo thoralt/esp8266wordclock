@@ -8,6 +8,9 @@ LEDFunctionsClass LED = LEDFunctionsClass();
 //---------------------------------------------------------------------------------------
 // variables in PROGMEM (mapping table, images)
 //---------------------------------------------------------------------------------------
+
+// this mapping table maps the linear memory buffer structure used throughout the
+// project to the physical layout of the LEDs
 static const uint32_t PROGMEM led_mapping[NUM_PIXELS] =
 {
     10,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0,
@@ -23,6 +26,7 @@ static const uint32_t PROGMEM led_mapping[NUM_PIXELS] =
     112, 111, 110, 113
 };
 
+// color gradient from white to green to black for matrix screen saver
 #define MATRIX_GRADIENT_LENGTH 12
 static const palette_entry matrix_gradient[MATRIX_GRADIENT_LENGTH] = {
     {255, 255, 255},
@@ -39,6 +43,9 @@ static const palette_entry matrix_gradient[MATRIX_GRADIENT_LENGTH] = {
     {  0,   0,   0}
 };
 
+// animation frames for hourglass animation
+// second dimension is NUM_PIXELS+2 to guarantee each frame starts at
+// a 32 bit boundary
 static const uint8_t PROGMEM hourglass_animation[HOURGLASS_ANIMATION_FRAMES][NUM_PIXELS+2] = {
     {   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
         0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
@@ -130,27 +137,43 @@ static const uint8_t PROGMEM hourglass_animation[HOURGLASS_ANIMATION_FRAMES][NUM
         2, 2, 2, 2, 0, 0}
 };
 
+//---------------------------------------------------------------------------------------
+// randomizeStar
+//
+// Assigns new random coordinates and speed to a star structure. Retries until new
+// coordinates have a distance of minimum 2 LEDs.
+//
+// -> index: Number of star to be randomized [0...NUM_STARS-1]
+// <- --
+//---------------------------------------------------------------------------------------
 void LEDFunctionsClass::randomizeStar(int index)
 {
 	int retryCount = 0;
 	bool distanceOK;
-	float dx, dy;
-	int x=0, y=0;
+	int x=0, y=0, dx, dy;
 
 	do
 	{
+		// assume distance is OK
 		distanceOK = true;
+
+		// create new random pair
     	x = random(11);
     	y = random(10);
 		retryCount++;
 
+		// iterate over all other stars
 		for(int j=0; j<NUM_STARS; j++)
 		{
+			// skip the star which is currently being randomized
 			if(j==index) continue;
+
+			// calculate distance
 			dx = x - star_objects[j].x;
 			dy = y - star_objects[j].y;
-			if(sqrt(dx*dx + dy*dy) < 2.0f)
+			if(dx*dx + dy*dy < 5)
 			{
+				// retry if distance to any star is below limit
 				distanceOK = false;
 				break;
 			}
@@ -173,6 +196,7 @@ void LEDFunctionsClass::randomizeStar(int index)
 //---------------------------------------------------------------------------------------
 LEDFunctionsClass::LEDFunctionsClass()
 {
+	// initialize matrix objects with random coordinates
     for(int i=0; i<NUM_MATRIX_OBJECTS; i++)
     {
         this->matrix_objects[i].x = random(11);
@@ -181,12 +205,15 @@ LEDFunctionsClass::LEDFunctionsClass()
         this->matrix_objects[i].count = 0;
     }
 
+    // initialize star objects with coordinates [-10, -10] to prepare for
+    // calls to randomizeStar()
     for(int i=0; i<NUM_STARS; i++)
     {
     	this->star_objects[i].x = -10;
     	this->star_objects[i].y = -10;
     }
 
+    // initialize stars with random coordinates
     for(int i=0; i<NUM_STARS; i++)
     {
     	this->randomizeStar(i);
@@ -213,14 +240,18 @@ void LEDFunctionsClass::begin(int pin)
 //---------------------------------------------------------------------------------------
 // hourglass
 //
-// Immediately displays an animation step of the hourglass animation
+// Immediately displays an animation step of the hourglass animation.
+// ATTENTION: Animation frames must start at 32 bit boundary each!
 //
 // -> animationStep: Number of current frame [0...HOURGLASS_ANIMATION_FRAMES]
 // <- --
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::hourglass(uint8_t animationStep)
 {
+	// colors in palette: black, white, yellow
     palette_entry p[] = {{0, 0, 0}, {255, 255, 255}, {255, 255, 0}};
+
+    // safety check
     if(animationStep < HOURGLASS_ANIMATION_FRAMES)
     {
         this->set(hourglass_animation[animationStep], p, true);
@@ -241,6 +272,7 @@ void LEDFunctionsClass::hourglass(uint8_t animationStep)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::process()
 {
+	// check for flags to display matrix, heart or stars
     if(this->doMatrix)
     {
         this->matrix();
@@ -255,6 +287,7 @@ void LEDFunctionsClass::process()
     }
     else
     {
+    	// no special fx -> do normal fading and display current state
         this->fade();
         this->show();
     }
@@ -263,7 +296,8 @@ void LEDFunctionsClass::process()
 //---------------------------------------------------------------------------------------
 // setBrightness
 //
-// Sets the brightness for the WS2812 values
+// Sets the brightness for the WS2812 values. Will be multiplied with each color
+// component when sending data to WS2812.
 //
 // -> brightness: [0...255]
 // <- --
@@ -287,7 +321,12 @@ void LEDFunctionsClass::setBrightness(uint8_t brightness)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry palette[])
 {
+	// buffer to hold pixel states as palette indexes
     uint8_t buf[NUM_PIXELS];
+
+    // initialize the buffer with either background (=0) or seconds progress (=2)
+    // part of the background will be illuminated with color 2 depending on current
+    // seconds/milliseconds value, whole screen is backlit when seconds = 59
     int pos = s * 1000 + ms;
     pos *= 110;
     pos /= 60000;
@@ -297,6 +336,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
         if (i < pos) buf[i] = 2; else buf[i] = 0;
     }
     
+    // set static LEDs
     buf[0 * 11 + 0] = 1; // E
     buf[0 * 11 + 1] = 1; // S
 
@@ -328,7 +368,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
         buf[10 * 11 + 3] = 1;
     }
     
-    // Minuten
+    // minutes
     if (m < 5)
     {
         buf[9 * 11 + 8] = 1;  // U
@@ -534,10 +574,10 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
         h++;
     }
 
-    // Stundenüberlauf wegen Erhöhung auf nächste Stunde berücksichtigen
+    // check for hours overflow
     if (h > 23) h = 0;
     
-    // Stunden
+    // hours
     if (h == 0 || h == 12)
     {
         buf[9 * 11 + 0] = 1;  // Z
@@ -626,6 +666,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
         buf[8 * 11 + 10] = 1; // F
     }
     
+    // set the new values as target for fade operation
     this->set(buf, palette);
 }
 
@@ -715,7 +756,8 @@ void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source, palett
 // fade
 //
 // Fade one step of the color values from this->currentValues[i] to 
-// this->targetValues[i].
+// this->targetValues[i]. Uses non-linear fade speed depending on distance to target
+// value.
 //
 // -> --
 // <- --
@@ -827,6 +869,7 @@ void LEDFunctionsClass::matrix()
     // clear buffer    
     for(int i=0; i<NUM_PIXELS*3; i++) buf[i] = 0;
     
+    // iterate over all matrix objects
     for(int i=0; i<NUM_MATRIX_OBJECTS; i++)
     {
     	// check if current matrix object has left the screen
@@ -885,19 +928,24 @@ void LEDFunctionsClass::stars()
     int x, y, b, offset;
 	for(int i=0; i<NUM_STARS; i++)
 	{
+		// fetch coordinates and brightness of current star
 		x = this->star_objects[i].x;
 		y = this->star_objects[i].y;
 		b = this->star_objects[i].brightness;
+
+		// write brightness to target buffer
 		offset = led_mapping[x + y*11] * 3;
 		buf[offset + 0] = b;
 		buf[offset + 1] = b;
 		buf[offset + 2] = b;
 
+		// increase or decrease brightness depending on current state
 		if(this->star_objects[i].state == 0)
 		{
 			this->star_objects[i].brightness += this->star_objects[i].speed;
 			if(this->star_objects[i].brightness >= 255)
 			{
+				// switch to decreasing mode
 				this->star_objects[i].brightness = 255;
 				this->star_objects[i].state = 1;
 			}
@@ -907,12 +955,15 @@ void LEDFunctionsClass::stars()
 			this->star_objects[i].brightness -= this->star_objects[i].speed;
 			if(this->star_objects[i].brightness <= 0)
 			{
+				// switch to increasing mode and get new random coordinates
 				this->star_objects[i].brightness = 0;
 				this->star_objects[i].state = 0;
 				this->randomizeStar(i);
 			}
 		}
 	}
+
+	// send current values to LEDs
     this->show();
 }
 
