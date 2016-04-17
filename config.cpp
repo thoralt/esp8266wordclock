@@ -59,6 +59,7 @@ void ConfigClass::save()
     this->config->bg = this->bg;
     this->config->fg = this->fg;
     this->config->s = this->s;
+    this->config->heartbeat = this->heartbeat;
     for(int i=0; i<4; i++) this->config->ntpserver[i] = this->ntpserver[i];
 
     for(int i=0; i<EEPROM_SIZE; i++) EEPROM.write(i, this->eeprom_data[i]);
@@ -79,6 +80,7 @@ void ConfigClass::reset()
     this->config->bg = {0, 0, 0};
     this->config->fg = {255, 255, 255};
     this->config->s = {32, 0, 21};
+    this->config->heartbeat = true;
     this->ntpserver[0] = 129;
     this->ntpserver[1] = 6;
     this->ntpserver[2] = 15;
@@ -106,5 +108,6 @@ void ConfigClass::load()
     this->bg = this->config->bg;
     this->fg = this->config->fg;
     this->s = this->config->s;
+    this->heartbeat = this->config->heartbeat;
     for(int i=0; i<4; i++) this->ntpserver[i] = this->config->ntpserver[i];
 }

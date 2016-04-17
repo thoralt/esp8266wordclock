@@ -73,7 +73,7 @@ void timerCallback()
     	timeVarLock = false;
     }
     
-    if (ms == 0) digitalWrite(2, LOW); else digitalWrite(2, HIGH);
+    if (ms == 0 && Config.heartbeat) digitalWrite(2, LOW); else digitalWrite(2, HIGH);
     
     if(WebServer.showHourglass)
     {

@@ -33,6 +33,7 @@ private:
 	void handleNotFound();
 	void handleMatrix();
 	void handleHeart();
+	void handleHeartbeat();
 	void handleStars();
 	void handleInfo();
 	void handleGetNtpServer();

@@ -56,6 +56,7 @@ void WebServerClass::begin()
     this->server->on("/matrix", std::bind(&WebServerClass::handleMatrix, this));
     this->server->on("/heart", std::bind(&WebServerClass::handleHeart, this));
     this->server->on("/stars", std::bind(&WebServerClass::handleStars, this));
+    this->server->on("/heartbeat", std::bind(&WebServerClass::handleHeartbeat, this));
     this->server->on("/hourglass", std::bind(&WebServerClass::handleHourglass, this));
     this->server->on("/getcolors", std::bind(&WebServerClass::handleGetColors, this));
     this->server->on("/getntpserver", std::bind(&WebServerClass::handleGetNtpServer, this));
@@ -307,6 +308,20 @@ void WebServerClass::handleLoadConfig()
 void WebServerClass::handleMatrix()
 {
 	showMatrix = (this->server->hasArg("state") && this->server->arg("state")=="1");
+    this->server->send(200, "text/plain", "OK");
+}
+
+//---------------------------------------------------------------------------------------
+// handleHeartbeat
+//
+// Sets or resets the heartbeat flag in the configuration based on agrument "state"
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleHeartbeat()
+{
+    Config.heartbeat = (this->server->hasArg("state") && this->server->arg("state")=="1");
     this->server->send(200, "text/plain", "OK");
 }
 

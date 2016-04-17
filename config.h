@@ -15,6 +15,7 @@ typedef struct _config_struct
     palette_entry fg;
     palette_entry s;
     uint8_t ntpserver[4];
+    bool heartbeat;
 } config_struct;
 
 #define EEPROM_SIZE 512
@@ -33,6 +34,7 @@ public:
 	palette_entry bg;
 	palette_entry s;
 	IPAddress ntpserver = IPAddress(0, 0, 0, 0);
+	bool heartbeat = true;
 
 private:
 	config_struct *config = (config_struct*) eeprom_data;;
