@@ -1,3 +1,27 @@
+//	ESP8266 Wordclock
+//	Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
+//	
+//		This project is the firmware for a Wordclock consisting of 114 WS2812B LEDs.
+//		It implements:
+//			- NTP client for time synchronization
+//			- a web server for configuration access
+//			- mDNS client for easy discovery
+//			- class for easy LED access with fading
+//			- OTA (over the air) updates
+//			- WiFi manager for easy configuration in unknown WiFi networks
+//
+//	This program is free software: you can redistribute it and/or modify
+//	it under the terms of the GNU General Public License as published by
+//	the Free Software Foundation, either version 3 of the License, or
+//	(at your option) any later version.
+//	
+//	This program is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU General Public License for more details.
+//	
+//	You should have received a copy of the GNU General Public License
+//	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
@@ -363,7 +387,7 @@ void loop()
     {
         lastSecond = s;
         Serial.print(STRING2(h) + ":" + STRING2(m) + ":" + STRING2(s));
-        Serial.print(String(", ADC=") + Brightness.adcAvg);
+        Serial.print(String(", ADC=") + Brightness.avg);
         Serial.print(String(", heap=") + ESP.getFreeHeap());
         Serial.println(String(", brightness=") + Brightness.value());
     }
