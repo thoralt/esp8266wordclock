@@ -105,7 +105,7 @@ void WebServerClass::process()
 //
 // -> path: name of the file; "index.html" will be added if name ends with "/"
 // <- true: file was found and served to client
-//    false: file not found
+//	false: file not found
 //---------------------------------------------------------------------------------------
 bool WebServerClass::serveFile(String path)
 {
@@ -267,7 +267,7 @@ void WebServerClass::handleInfo()
 //
 // Converts the given web server argument to a color struct
 // -> argName: Name of the web server argument
-//    result: Pointer to palette_entry struct to receive result
+//	result: Pointer to palette_entry struct to receive result
 // <- --
 //---------------------------------------------------------------------------------------
 void WebServerClass::extractColor(String argName, palette_entry *result)
@@ -291,8 +291,8 @@ void WebServerClass::extractColor(String argName, palette_entry *result)
 // handleSetColor
 //
 // Handles the "/setcolor" request, expects arguments:
-//    /setcolor?fg=xxxxxx&bg=yyyyyy&s=zzzzzz
-//    with xxxxxx, yyyyyy and zzzzzz being hexadecimal HTML colors (without leading '#')
+//	/setcolor?fg=xxxxxx&bg=yyyyyy&s=zzzzzz
+//	with xxxxxx, yyyyyy and zzzzzz being hexadecimal HTML colors (without leading '#')
 //
 // -> --
 // <- --

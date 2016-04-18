@@ -103,9 +103,9 @@ IPAddress NtpClass::getServer()
 // upon success, repeats every 59 minutes
 //
 // -> ip: Address of an NTP server
-//    callback: Function to receive the current time (hours, minutes, seconds, ms)
-//    timezone: Hours difference from UTC (will be added to the received time, can be
-//              negative)
+//	callback: Function to receive the current time (hours, minutes, seconds, ms)
+//	timezone: Hours difference from UTC (will be added to the received time, can be
+//			  negative)
 // <- --
 //---------------------------------------------------------------------------------------
 void NtpClass::begin(IPAddress ip, TNtpCallback callback, int timezone)
@@ -206,8 +206,7 @@ void NtpClass::parse()
 	this->ms = 0;
 
 	Serial.print("ms), local time: ");
-	Serial.println(
-			STRING2(this->h) + ":" + STRING2(this->m) + ":" + STRING2(this->s));
+	Serial.println(STRING2(this->h) + ":" + STRING2(this->m) + ":" + STRING2(this->s));
 }
 
 //---------------------------------------------------------------------------------------

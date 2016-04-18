@@ -1,27 +1,27 @@
-//	ESP8266 Wordclock
-//	Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
-//	
-//		This project is the firmware for a Wordclock consisting of 114 WS2812B LEDs.
-//		It implements:
-//			- NTP client for time synchronization
-//			- a web server for configuration access
-//			- mDNS client for easy discovery
-//			- class for easy LED access with fading
-//			- OTA (over the air) updates
-//			- WiFi manager for easy configuration in unknown WiFi networks
+// ESP8266 Wordclock
+// Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
 //
-//	This program is free software: you can redistribute it and/or modify
-//	it under the terms of the GNU General Public License as published by
-//	the Free Software Foundation, either version 3 of the License, or
-//	(at your option) any later version.
-//	
-//	This program is distributed in the hope that it will be useful,
-//	but WITHOUT ANY WARRANTY; without even the implied warranty of
-//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//	GNU General Public License for more details.
-//	
-//	You should have received a copy of the GNU General Public License
-//	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+//  This project is the firmware for a Wordclock consisting of 114 WS2812B LEDs.
+//  It implements:
+//   - NTP client for time synchronization
+//   - a web server for configuration access
+//   - mDNS client for easy discovery
+//   - class for easy LED access with fading
+//   - OTA (over the air) updates
+//   - WiFi manager for easy configuration in unknown WiFi networks
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
@@ -125,22 +125,22 @@ void timerCallback()
 void configModeCallback(WiFiManager *myWiFiManager) 
 {
 	WebServer.showHourglass = false;
-    
-    const uint8_t wifimanager[] = {
-        0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-        0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
-        0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-        1, 1, 1, 1
-    };
-    palette_entry p[] = {{0, 0, 0}, {255, 255, 0}};    
-    LED.set(wifimanager, p, true);
+
+	const uint8_t wifimanager[] = {
+		0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
+		0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		1, 1, 1, 1
+	};
+	palette_entry p[] = {{0, 0, 0}, {255, 255, 0}};
+	LED.set(wifimanager, p, true);
 	Serial.println("Entered config mode");
 	Serial.println(WiFi.softAPIP());
 	Serial.println(myWiFiManager->getConfigPortalSSID());
@@ -219,101 +219,101 @@ void setup()
 	Serial.println("Initializing OTA");
 	ArduinoOTA.setPort(8266);
 	ArduinoOTA.setHostname("WordClock");
-    //ArduinoOTA.setPassword((const char *)"123");
-    ArduinoOTA.onStart([]()
-    {
-    	WebServer.showHourglass = false;
-        
-        const uint8_t update[] = {
-            0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
-            0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-            1, 1, 1, 1
-        };
-        OTA_in_progress = 1;
-        Serial.println("OTA Start");
-        palette_entry p[] = {{0, 0, 0}, {255, 0, 0}};
-        LED.set(update, p, true);
-    });
-    ArduinoOTA.onEnd([]()
-    {
-        const uint8_t update_ok[] = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1
-        };
-        palette_entry p[] = {{0, 21, 0}, {0, 255, 0}};
-        LED.set(update_ok, p, true);
-        Serial.println("\nOTA End");
-    });
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-    {
-        uint8_t update[] = {
-            0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
-            0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-            1, 1, 1, 1
-        };
-        palette_entry p[] = {{0, 0, 0}, {255, 0, 0}, {42, 21, 0}, {255, 85, 0}};
-        int current_progress = progress * 110 / total;
-        for(int i=0; i<110; i++)
-        {
-            if(i<current_progress)
-            {
-                if(update[i] == 0) update[i] = 2;
-                else update[i] = 3;
-            }
-        }
-        LED.set(update, p, true);
-        Serial.printf("OTA Progress: %u%%\r", (progress / (total / 100)));
-    });
-    ArduinoOTA.onError([](ota_error_t error)
-    {
-        const uint8_t update_err[] = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1
-        };
-        palette_entry p[] = {{0, 0, 0}, {255, 0, 0}};
-        LED.set(update_err, p, true);
-        
-        Serial.printf("OTA Error[%u]: ", error);
+	//ArduinoOTA.setPassword((const char *)"123");
+	ArduinoOTA.onStart([]()
+	{
+		WebServer.showHourglass = false;
+
+		const uint8_t update[] = {
+			0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
+			0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+			1, 1, 1, 1
+		};
+		OTA_in_progress = 1;
+		Serial.println("OTA Start");
+		palette_entry p[] = {{0, 0, 0}, {255, 0, 0}};
+		LED.set(update, p, true);
+	});
+	ArduinoOTA.onEnd([]()
+	{
+		const uint8_t update_ok[] = {
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 1
+		};
+		palette_entry p[] = {{0, 21, 0}, {0, 255, 0}};
+		LED.set(update_ok, p, true);
+		Serial.println("\nOTA End");
+	});
+	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+	{
+		uint8_t update[] = {
+			0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
+			0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+			1, 1, 1, 1
+		};
+		palette_entry p[] = {{0, 0, 0}, {255, 0, 0}, {42, 21, 0}, {255, 85, 0}};
+		int current_progress = progress * 110 / total;
+		for(int i=0; i<110; i++)
+		{
+			if(i<current_progress)
+			{
+				if(update[i] == 0) update[i] = 2;
+				else update[i] = 3;
+			}
+		}
+		LED.set(update, p, true);
+		Serial.printf("OTA Progress: %u%%\r", (progress / (total / 100)));
+	});
+	ArduinoOTA.onError([](ota_error_t error)
+	{
+		const uint8_t update_err[] = {
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 1
+		};
+		palette_entry p[] = {{0, 0, 0}, {255, 0, 0}};
+		LED.set(update_err, p, true);
+
+		Serial.printf("OTA Error[%u]: ", error);
 		if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
 		else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
 		else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
 		else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
 		else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
+	});
 	ArduinoOTA.begin();
 
 	// NTP
@@ -342,40 +342,40 @@ void loop()
 	if (OTA_in_progress)
 		return;
 
-    if(updateCountdown)
-    {
-        const uint8_t wifimanager[] = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1
-        };
-        palette_entry p[] = {{0, 0, 0}, {0, 255, 0}};
+	if(updateCountdown)
+	{
+		const uint8_t wifimanager[] = {
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 1
+		};
+		palette_entry p[] = {{0, 0, 0}, {0, 255, 0}};
 		LED.set(wifimanager, p, true);
 
 		Serial.print(".");
 		delay(100);
 		updateCountdown--;
 		return;
-    }
+	}
 
 	// do web server stuff
 	WebServer.process();
 
-    // load palette colors from configuration
-    palette_entry p[] = {
+	// load palette colors from configuration
+	palette_entry p[] = {
 		{Config.bg.r, Config.bg.g, Config.bg.b},
 		{Config.fg.r, Config.fg.g, Config.fg.b},
 		{Config.s.r,  Config.s.g,  Config.s.b}};
-    
-    if (!WebServer.showHourglass)
+
+	if (!WebServer.showHourglass)
 	{
 		LED.showHeart(WebServer.showHeart || (h == 22 && m == 00));
 		LED.showMatrix(WebServer.showMatrix || (h == 13 && m == 37));

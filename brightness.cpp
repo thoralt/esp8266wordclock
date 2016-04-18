@@ -69,15 +69,15 @@ uint32_t BrightnessClass::filter(uint16_t input)
 //---------------------------------------------------------------------------------------
 uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 {
-    float lightTable[] = {
-        0, 160, 
-        300, 96,
-        680, 64, 
-        800, 32, 
-        900, 15, 
-        1023, 15, 
-        -1, -1
-    };
+	float lightTable[] = {
+		0, 160,
+		300, 96,
+		680, 64,
+		800, 32,
+		900, 15,
+		1023, 15,
+		-1, -1
+	};
 
 	int i = 0;
 	float result;
