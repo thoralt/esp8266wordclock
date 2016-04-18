@@ -45,7 +45,6 @@ int OTA_in_progress = 0;
 // WiFiServer telnetServer(23);
 // WiFiClient telnetClient; 
 
-
 //---------------------------------------------------------------------------------------
 // Timer related variables
 //---------------------------------------------------------------------------------------
@@ -74,41 +73,45 @@ int updateCountdown = 25;
 //---------------------------------------------------------------------------------------
 void timerCallback()
 {
-    if (!timeVarLock)
-    {
-    	timeVarLock = true;
-        ms += TIMER_RESOLUTION;
-        if (ms >= 1000)
-        {
-            ms -= 1000;
-            if (++s > 59)
-            {
-                s = 0;
-                if (++m > 59)
-                {
-                    m = 0;
-                    if (++h > 23)
-                    {
-                        h = 0;
-                    }
-                }
-            }
-        }
-    	timeVarLock = false;
-    }
-    
-    if (ms == 0 && Config.heartbeat) digitalWrite(2, LOW); else digitalWrite(2, HIGH);
-    
-    if(WebServer.showHourglass)
-    {
-        hourglassPrescaler += TIMER_RESOLUTION;
-        if(hourglassPrescaler >= HOURGLASS_ANIMATION_PERIOD)
-        {
-            LED.hourglass(hourglassState);
-            hourglassPrescaler -= HOURGLASS_ANIMATION_PERIOD;
-            if(++hourglassState >= HOURGLASS_ANIMATION_FRAMES) hourglassState = 0;
-        }
-    }
+	if (!timeVarLock)
+	{
+		timeVarLock = true;
+		ms += TIMER_RESOLUTION;
+		if (ms >= 1000)
+		{
+			ms -= 1000;
+			if (++s > 59)
+			{
+				s = 0;
+				if (++m > 59)
+				{
+					m = 0;
+					if (++h > 23)
+					{
+						h = 0;
+					}
+				}
+			}
+		}
+		timeVarLock = false;
+	}
+
+	if (ms == 0 && Config.heartbeat)
+		digitalWrite(2, LOW);
+	else
+		digitalWrite(2, HIGH);
+
+	if (WebServer.showHourglass)
+	{
+		hourglassPrescaler += TIMER_RESOLUTION;
+		if (hourglassPrescaler >= HOURGLASS_ANIMATION_PERIOD)
+		{
+			LED.hourglass(hourglassState);
+			hourglassPrescaler -= HOURGLASS_ANIMATION_PERIOD;
+			if (++hourglassState >= HOURGLASS_ANIMATION_FRAMES)
+				hourglassState = 0;
+		}
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -138,9 +141,9 @@ void configModeCallback(WiFiManager *myWiFiManager)
     };
     palette_entry p[] = {{0, 0, 0}, {255, 255, 0}};    
     LED.set(wifimanager, p, true);
-    Serial.println("Entered config mode");
-    Serial.println(WiFi.softAPIP());
-    Serial.println(myWiFiManager->getConfigPortalSSID());
+	Serial.println("Entered config mode");
+	Serial.println(WiFi.softAPIP());
+	Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
 //---------------------------------------------------------------------------------------
@@ -154,18 +157,19 @@ void configModeCallback(WiFiManager *myWiFiManager)
 //---------------------------------------------------------------------------------------
 void NtpCallback(uint8_t _h, uint8_t _m, uint8_t _s, uint8_t _ms)
 {
-    Serial.println("NtpCallback()");
+	Serial.println("NtpCallback()");
 
-    // wait if timer variable lock is set
-    while(timeVarLock) delay(1);
+	// wait if timer variable lock is set
+	while (timeVarLock)
+		delay(1);
 
-    // lock timer variables to prevent changes during interrupt
-    timeVarLock = true;
-    h = _h;
-    m = _m;
-    s = _s;
-    ms = _ms;
-    timeVarLock = false;
+	// lock timer variables to prevent changes during interrupt
+	timeVarLock = true;
+	h = _h;
+	m = _m;
+	s = _s;
+	ms = _ms;
+	timeVarLock = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -178,43 +182,43 @@ void NtpCallback(uint8_t _h, uint8_t _m, uint8_t _s, uint8_t _ms)
 //---------------------------------------------------------------------------------------
 void setup()
 {
-    // ESP8266 LED
-    pinMode(2, OUTPUT);
+	// ESP8266 LED
+	pinMode(2, OUTPUT);
 
-    // serial port
-    Serial.begin(115200);
-    Serial.println();
-    Serial.println();
-    Serial.println("ESP8266 WordClock setup() begin");
+	// serial port
+	Serial.begin(115200);
+	Serial.println();
+	Serial.println();
+	Serial.println("ESP8266 WordClock setup() begin");
 
-    // timer
-    Serial.println("Starting timer");
-    timer.attach(TIMER_RESOLUTION / 1000.0, timerCallback);
+	// timer
+	Serial.println("Starting timer");
+	timer.attach(TIMER_RESOLUTION / 1000.0, timerCallback);
 
-    // configuration
-    Serial.println("Loading configuration");
-    Config.begin();
-    
-    // LEDs
-    Serial.println("Starting LED module");
-    LED.begin(5);
-    WebServer.showHourglass = true;
+	// configuration
+	Serial.println("Loading configuration");
+	Config.begin();
 
-    // WiFi  
-    Serial.println("Initializing WiFi");
-    WiFiManager wifiManager;
-    wifiManager.setAPCallback(configModeCallback);
-    if(!wifiManager.autoConnect("WordClock"))
-    {
-        Serial.println("failed to connect, timeout");
-        delay(1000);
-        ESP.reset();
-    }
-    
-    // OTA update
-    Serial.println("Initializing OTA");
-    ArduinoOTA.setPort(8266);
-    ArduinoOTA.setHostname("WordClock");
+	// LEDs
+	Serial.println("Starting LED module");
+	LED.begin(5);
+	WebServer.showHourglass = true;
+
+	// WiFi
+	Serial.println("Initializing WiFi");
+	WiFiManager wifiManager;
+	wifiManager.setAPCallback(configModeCallback);
+	if (!wifiManager.autoConnect("WordClock"))
+	{
+		Serial.println("failed to connect, timeout");
+		delay(1000);
+		ESP.reset();
+	}
+
+	// OTA update
+	Serial.println("Initializing OTA");
+	ArduinoOTA.setPort(8266);
+	ArduinoOTA.setHostname("WordClock");
     //ArduinoOTA.setPassword((const char *)"123");
     ArduinoOTA.onStart([]()
     {
@@ -304,26 +308,26 @@ void setup()
         LED.set(update_err, p, true);
         
         Serial.printf("OTA Error[%u]: ", error);
-        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-        else if (error == OTA_END_ERROR) Serial.println("End Failed");
+		if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+		else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+		else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+		else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+		else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
-    ArduinoOTA.begin();
-    
-    // NTP
-    Serial.println("Starting NTP module");
-    NTP.begin(Config.ntpserver, NtpCallback, 2);
-    
-    // web server
-    Serial.println("Starting HTTP server");
-    WebServer.begin();
-    
-    // telnetServer.begin();
-    // telnetServer.setNoDelay(true);
-    
-    WebServer.showHourglass = false;
+	ArduinoOTA.begin();
+
+	// NTP
+	Serial.println("Starting NTP module");
+	NTP.begin(Config.ntpserver, NtpCallback, 2);
+
+	// web server
+	Serial.println("Starting HTTP server");
+	WebServer.begin();
+
+	// telnetServer.begin();
+	// telnetServer.setNoDelay(true);
+
+	WebServer.showHourglass = false;
 }
 
 //-----------------------------------------------------------------------------------
@@ -331,11 +335,12 @@ void setup()
 //-----------------------------------------------------------------------------------
 void loop()
 {
-    // do OTA update stuff
-    ArduinoOTA.handle();
-    
-    // do not continue if OTA update is in progress
-    if(OTA_in_progress) return;
+	// do OTA update stuff
+	ArduinoOTA.handle();
+
+	// do not continue if OTA update is in progress
+	if (OTA_in_progress)
+		return;
 
     if(updateCountdown)
     {
@@ -353,16 +358,16 @@ void loop()
             1, 1, 1, 1
         };
         palette_entry p[] = {{0, 0, 0}, {0, 255, 0}};
-        LED.set(wifimanager, p, true);
+		LED.set(wifimanager, p, true);
 
-    	Serial.print(".");
-    	delay(100);
-    	updateCountdown--;
-    	return;
+		Serial.print(".");
+		delay(100);
+		updateCountdown--;
+		return;
     }
 
-    // do web server stuff
-    WebServer.process();
+	// do web server stuff
+	WebServer.process();
 
     // load palette colors from configuration
     palette_entry p[] = {
@@ -370,63 +375,63 @@ void loop()
 		{Config.fg.r, Config.fg.g, Config.fg.b},
 		{Config.s.r,  Config.s.g,  Config.s.b}};
     
-    if(!WebServer.showHourglass)
-    {
-        LED.showHeart(WebServer.showHeart || (h==22 && m==00));
-        LED.showMatrix(WebServer.showMatrix || (h==13 && m==37));
-        LED.showStars(WebServer.showStars || (h==23 && m==00));
-        LED.displayTime(h, m, s, ms, p);
-        LED.setBrightness(Brightness.value());
-        LED.process();
-    }
-    
-    delay(10);
-    
-    // output current time if second value has changed
-    if (s != lastSecond)
-    {
-        lastSecond = s;
-        Serial.print(STRING2(h) + ":" + STRING2(m) + ":" + STRING2(s));
-        Serial.print(String(", ADC=") + Brightness.avg);
-        Serial.print(String(", heap=") + ESP.getFreeHeap());
-        Serial.println(String(", brightness=") + Brightness.value());
-    }
+    if (!WebServer.showHourglass)
+	{
+		LED.showHeart(WebServer.showHeart || (h == 22 && m == 00));
+		LED.showMatrix(WebServer.showMatrix || (h == 13 && m == 37));
+		LED.showStars(WebServer.showStars || (h == 23 && m == 00));
+		LED.displayTime(h, m, s, ms, p);
+		LED.setBrightness(Brightness.value());
+		LED.process();
+	}
 
-    if(Serial.available())
-    {
-    	int incoming = Serial.read();
-        switch(incoming)
-        {
-        case 'i':
-            Serial.println("WordClock ESP8266 ready.");
-            break;
+	delay(10);
 
-        case 'm':
-        	WebServer.showMatrix = !WebServer.showMatrix;
-            break;
+	// output current time if second value has changed
+	if (s != lastSecond)
+	{
+		lastSecond = s;
+		Serial.print(STRING2(h) + ":" + STRING2(m) + ":" + STRING2(s));
+		Serial.print(String(", ADC=") + Brightness.avg);
+		Serial.print(String(", heap=") + ESP.getFreeHeap());
+		Serial.println(String(", brightness=") + Brightness.value());
+	}
 
-        case 'X':
-            WiFi.disconnect();
-            ESP.reset();
-            break;
+	if (Serial.available())
+	{
+		int incoming = Serial.read();
+		switch (incoming)
+		{
+		case 'i':
+			Serial.println("WordClock ESP8266 ready.");
+			break;
 
-        default:
-            Serial.print("Unknown command '");
-            Serial.print((char)incoming);
-            Serial.println("'");
-        	break;
-        }
-    }
-    
-    // if (telnetServer.hasClient())
-    // {
-        // if(telnetClient.connected())
-        // {
-            // telnetClient.stop();
-        // }
-        // telnetClient = telnetServer.available();
-        // telnetClient.println("WordClock telnet server ready.");
-    // }
+		case 'm':
+			WebServer.showMatrix = !WebServer.showMatrix;
+			break;
+
+		case 'X':
+			WiFi.disconnect();
+			ESP.reset();
+			break;
+
+		default:
+			Serial.print("Unknown command '");
+			Serial.print((char) incoming);
+			Serial.println("'");
+			break;
+		}
+	}
+
+	// if (telnetServer.hasClient())
+	// {
+	// if(telnetClient.connected())
+	// {
+	// telnetClient.stop();
+	// }
+	// telnetClient = telnetServer.available();
+	// telnetClient.println("WordClock telnet server ready.");
+	// }
 
 }
 // ./esptool.py --port /dev/tty.usbserial --baud 460800 write_flash --flash_size=8m 0 /var/folders/yh/bv744591099f3x24xbkc22zw0000gn/T/build006b1a55228a1b90dda210fcddb62452.tmp/test.ino.bin

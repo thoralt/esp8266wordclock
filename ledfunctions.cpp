@@ -1,23 +1,23 @@
-//	ESP8266 Wordclock
-//	Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
+// ESP8266 Wordclock
+// Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
 //
-//		This module implements functions to manage the WS2812B LEDs. Two buffers contain
-//		color information with current state and fade target state and are updated by
-//		either simple set operations or integrated screensavers (matrix, stars, heart).
-//		Also contains part of the data and logic for the hourglass animation.
+//  This module implements functions to manage the WS2812B LEDs. Two buffers contain
+//  color information with current state and fade target state and are updated by
+//  either simple set operations or integrated screensavers (matrix, stars, heart).
+//  Also contains part of the data and logic for the hourglass animation.
 //
-//	This program is free software: you can redistribute it and/or modify
-//	it under the terms of the GNU General Public License as published by
-//	the Free Software Foundation, either version 3 of the License, or
-//	(at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//	This program is distributed in the hope that it will be useful,
-//	but WITHOUT ANY WARRANTY; without even the implied warranty of
-//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//	GNU General Public License for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//	You should have received a copy of the GNU General Public License
-//	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ledfunctions.h"
 
 //---------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ void LEDFunctionsClass::randomizeStar(int index)
 {
 	int retryCount = 0;
 	bool distanceOK;
-	int x=0, y=0, dx, dy;
+	int x = 0, y = 0, dx, dy;
 
 	do
 	{
@@ -178,28 +178,28 @@ void LEDFunctionsClass::randomizeStar(int index)
 		distanceOK = true;
 
 		// create new random pair
-    	x = random(11);
-    	y = random(10);
+		x = random(11);
+		y = random(10);
 		retryCount++;
 
 		// iterate over all other stars
-		for(int j=0; j<NUM_STARS; j++)
+		for (int j = 0; j < NUM_STARS; j++)
 		{
 			// skip the star which is currently being randomized
-			if(j==index) continue;
+			if (j == index)
+				continue;
 
 			// calculate distance
 			dx = x - star_objects[j].x;
 			dy = y - star_objects[j].y;
-			if(dx*dx + dy*dy < 5)
+			if (dx * dx + dy * dy < 5)
 			{
 				// retry if distance to any star is below limit
 				distanceOK = false;
 				break;
 			}
 		}
-	}
-	while(!distanceOK && retryCount < 100);
+	} while (!distanceOK && retryCount < 100);
 
 	this->star_objects[index].x = x;
 	this->star_objects[index].y = y;
@@ -217,30 +217,30 @@ void LEDFunctionsClass::randomizeStar(int index)
 LEDFunctionsClass::LEDFunctionsClass()
 {
 	// initialize matrix objects with random coordinates
-    for(int i=0; i<NUM_MATRIX_OBJECTS; i++)
-    {
-        this->matrix_objects[i].x = random(11);
-        this->matrix_objects[i].y = random(25) - 25;
-        this->matrix_objects[i].speed = MATRIX_SPEED;
-        this->matrix_objects[i].count = 0;
-    }
+	for (int i = 0; i < NUM_MATRIX_OBJECTS; i++)
+	{
+		this->matrix_objects[i].x = random(11);
+		this->matrix_objects[i].y = random(25) - 25;
+		this->matrix_objects[i].speed = MATRIX_SPEED;
+		this->matrix_objects[i].count = 0;
+	}
 
-    // initialize star objects with coordinates [-10, -10] to prepare for
-    // calls to randomizeStar()
-    for(int i=0; i<NUM_STARS; i++)
-    {
-    	this->star_objects[i].x = -10;
-    	this->star_objects[i].y = -10;
-    }
+	// initialize star objects with coordinates [-10, -10] to prepare for
+	// calls to randomizeStar()
+	for (int i = 0; i < NUM_STARS; i++)
+	{
+		this->star_objects[i].x = -10;
+		this->star_objects[i].y = -10;
+	}
 
-    // initialize stars with random coordinates
-    for(int i=0; i<NUM_STARS; i++)
-    {
-    	this->randomizeStar(i);
-    	this->star_objects[i].count = 0;
-    	this->star_objects[i].state = 0;
-    	this->star_objects[i].brightness = random(250);
-    }
+	// initialize stars with random coordinates
+	for (int i = 0; i < NUM_STARS; i++)
+	{
+		this->randomizeStar(i);
+		this->star_objects[i].count = 0;
+		this->star_objects[i].state = 0;
+		this->star_objects[i].brightness = random(250);
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -253,8 +253,8 @@ LEDFunctionsClass::LEDFunctionsClass()
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::begin(int pin)
 {
-    this->pixels = new Adafruit_NeoPixel(NUM_PIXELS, pin, NEO_GRB + NEO_KHZ800);
-    this->pixels->begin();
+	this->pixels = new Adafruit_NeoPixel(NUM_PIXELS, pin, NEO_GRB + NEO_KHZ800);
+	this->pixels->begin();
 }
 
 //---------------------------------------------------------------------------------------
@@ -272,14 +272,14 @@ void LEDFunctionsClass::hourglass(uint8_t animationStep)
     palette_entry p[] = {{0, 0, 0}, {255, 255, 255}, {255, 255, 0}};
 
     // safety check
-    if(animationStep < HOURGLASS_ANIMATION_FRAMES)
-    {
-        this->set(hourglass_animation[animationStep], p, true);
-    }
-    else
-    {
-        this->set(hourglass_animation[0], p, true);
-    }
+	if (animationStep < HOURGLASS_ANIMATION_FRAMES)
+	{
+		this->set(hourglass_animation[animationStep], p, true);
+	}
+	else
+	{
+		this->set(hourglass_animation[0], p, true);
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -293,24 +293,24 @@ void LEDFunctionsClass::hourglass(uint8_t animationStep)
 void LEDFunctionsClass::process()
 {
 	// check for flags to display matrix, heart or stars
-    if(this->doMatrix)
-    {
-        this->matrix();
-    }
-    else if(this->doHeart)
-    {
-        this->heart();
-    }
-    else if(this->doStars)
-    {
-        this->stars();
-    }
-    else
-    {
-    	// no special fx -> do normal fading and display current state
-        this->fade();
-        this->show();
-    }
+	if (this->doMatrix)
+	{
+		this->matrix();
+	}
+	else if (this->doHeart)
+	{
+		this->heart();
+	}
+	else if (this->doStars)
+	{
+		this->stars();
+	}
+	else
+	{
+		// no special fx -> do normal fading and display current state
+		this->fade();
+		this->show();
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -324,7 +324,7 @@ void LEDFunctionsClass::process()
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::setBrightness(uint8_t brightness)
 {
-    this->brightness = brightness;
+	this->brightness = brightness;
 }
 
 //#define USE_BUGFIX
@@ -339,162 +339,166 @@ void LEDFunctionsClass::setBrightness(uint8_t brightness)
 //    palette: Array of 3 palette entries (background, foreground, seconds progress)
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry palette[])
+void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
+		palette_entry palette[])
 {
 	// buffer to hold pixel states as palette indexes
-    uint8_t buf[NUM_PIXELS];
+	uint8_t buf[NUM_PIXELS];
 
-    // initialize the buffer with either background (=0) or seconds progress (=2)
-    // part of the background will be illuminated with color 2 depending on current
-    // seconds/milliseconds value, whole screen is backlit when seconds = 59
-    int pos = s * 1000 + ms;
-    pos *= 110;
-    pos /= 60000;
-    pos++;
-    for (int i = 0; i < NUM_PIXELS; i++)
-    {
-        if (i < pos) buf[i] = 2; else buf[i] = 0;
-    }
-    
-    // set static LEDs
-    buf[0 * 11 + 0] = 1; // E
-    buf[0 * 11 + 1] = 1; // S
+	// initialize the buffer with either background (=0) or seconds progress (=2)
+	// part of the background will be illuminated with color 2 depending on current
+	// seconds/milliseconds value, whole screen is backlit when seconds = 59
+	int pos = s * 1000 + ms;
+	pos *= 110;
+	pos /= 60000;
+	pos++;
+	for (int i = 0; i < NUM_PIXELS; i++)
+	{
+		if (i < pos)
+			buf[i] = 2;
+		else
+			buf[i] = 0;
+	}
 
-    buf[0 * 11 + 3] = 1; // I
-    buf[0 * 11 + 4] = 1; // S
-    buf[0 * 11 + 5] = 1; // T
-    
-    // minutes 1...4 for the corners
-    if ((m % 5) == 1)
-    {
-        buf[10 * 11 + 0] = 1;
-    }
-    else if ((m % 5) == 2)
-    {
-        buf[10 * 11 + 0] = 1;
-        buf[10 * 11 + 1] = 1;
-    }
-    else if ((m % 5) == 3)
-    {
-        buf[10 * 11 + 0] = 1;
-        buf[10 * 11 + 1] = 1;
-        buf[10 * 11 + 2] = 1;
-    }
-    else if ((m % 5) == 4)
-    {
-        buf[10 * 11 + 0] = 1;
-        buf[10 * 11 + 1] = 1;
-        buf[10 * 11 + 2] = 1;
-        buf[10 * 11 + 3] = 1;
-    }
-    
-    // minutes
-    if (m < 5)
-    {
-        buf[9 * 11 + 8] = 1;  // U
-        buf[9 * 11 + 9] = 1;  // H
-        buf[9 * 11 + 10] = 1; // R
-    }
-    else if (m < 10)
-    {
-        buf[0 * 11 + 7] = 1;  // F
-        buf[0 * 11 + 8] = 1;  // Ü
-        buf[0 * 11 + 9] = 1;  // N
-        buf[0 * 11 + 10] = 1; // F
-        
-        buf[3 * 11 + 7] = 1;  // N
-        buf[3 * 11 + 8] = 1;  // A
-        buf[3 * 11 + 9] = 1;  // C
-        buf[3 * 11 + 10] = 1; // H
-    }
-    else if (m < 15)
-    {
-        buf[1 * 11 + 0] = 1;  // Z
-        buf[1 * 11 + 1] = 1;  // E
-        buf[1 * 11 + 2] = 1;  // H
-        buf[1 * 11 + 3] = 1;  // N
-        
-        buf[3 * 11 + 7] = 1;  // N
-        buf[3 * 11 + 8] = 1;  // A
-        buf[3 * 11 + 9] = 1;  // C
-        buf[3 * 11 + 10] = 1; // H
-    }
-    else if (m < 20)
-    {
-        buf[2 * 11 + 4] = 1;  // V
-        buf[2 * 11 + 5] = 1;  // I
-        buf[2 * 11 + 6] = 1;  // E
-        buf[2 * 11 + 7] = 1;  // R
-        buf[2 * 11 + 8] = 1;  // T
-        buf[2 * 11 + 9] = 1;  // E
-        buf[2 * 11 + 10] = 1; // L
-        h++;
-    }
-    else if (m < 25)
-    {
-        buf[1 * 11 + 0] = 1;  // Z
-        buf[1 * 11 + 1] = 1;  // E
-        buf[1 * 11 + 2] = 1;  // H
-        buf[1 * 11 + 3] = 1;  // N
+	// set static LEDs
+	buf[0 * 11 + 0] = 1; // E
+	buf[0 * 11 + 1] = 1; // S
 
-        buf[1 * 11 + 7] = 1;  // V
-        buf[1 * 11 + 8] = 1;  // O
-        buf[1 * 11 + 9] = 1;  // R
-        
-        buf[3 * 11 + 0] = 1;  // H
-        buf[3 * 11 + 1] = 1;  // A
-        buf[3 * 11 + 2] = 1;  // L
-        buf[3 * 11 + 3] = 1;  // B
-        h++;
-    }
-    else if (m < 30)
-    {
-        buf[0 * 11 + 7] = 1;  // F
-        buf[0 * 11 + 8] = 1;  // Ü
-        buf[0 * 11 + 9] = 1;  // N
-        buf[0 * 11 + 10] = 1; // F
-        
-        buf[1 * 11 + 7] = 1;  // V
-        buf[1 * 11 + 8] = 1;  // O
-        buf[1 * 11 + 9] = 1;  // R
-        
-        buf[3 * 11 + 0] = 1;  // H
-        buf[3 * 11 + 1] = 1;  // A
-        buf[3 * 11 + 2] = 1;  // L
-        buf[3 * 11 + 3] = 1;  // B
-        h++;
-    }
-    else if (m < 35)
-    {
-        buf[3 * 11 + 0] = 1;  // H
-        buf[3 * 11 + 1] = 1;  // A
-        buf[3 * 11 + 2] = 1;  // L
-        buf[3 * 11 + 3] = 1;  // B
-        h++;
-    }
-    else if (m < 40)
-    {
+	buf[0 * 11 + 3] = 1; // I
+	buf[0 * 11 + 4] = 1; // S
+	buf[0 * 11 + 5] = 1; // T
+
+	// minutes 1...4 for the corners
+	if ((m % 5) == 1)
+	{
+		buf[10 * 11 + 0] = 1;
+	}
+	else if ((m % 5) == 2)
+	{
+		buf[10 * 11 + 0] = 1;
+		buf[10 * 11 + 1] = 1;
+	}
+	else if ((m % 5) == 3)
+	{
+		buf[10 * 11 + 0] = 1;
+		buf[10 * 11 + 1] = 1;
+		buf[10 * 11 + 2] = 1;
+	}
+	else if ((m % 5) == 4)
+	{
+		buf[10 * 11 + 0] = 1;
+		buf[10 * 11 + 1] = 1;
+		buf[10 * 11 + 2] = 1;
+		buf[10 * 11 + 3] = 1;
+	}
+
+	// minutes
+	if (m < 5)
+	{
+		buf[9 * 11 + 8] = 1;  // U
+		buf[9 * 11 + 9] = 1;  // H
+		buf[9 * 11 + 10] = 1; // R
+	}
+	else if (m < 10)
+	{
+		buf[0 * 11 + 7] = 1;  // F
+		buf[0 * 11 + 8] = 1;  // Ü
+		buf[0 * 11 + 9] = 1;  // N
+		buf[0 * 11 + 10] = 1; // F
+
+		buf[3 * 11 + 7] = 1;  // N
+		buf[3 * 11 + 8] = 1;  // A
+		buf[3 * 11 + 9] = 1;  // C
+		buf[3 * 11 + 10] = 1; // H
+	}
+	else if (m < 15)
+	{
+		buf[1 * 11 + 0] = 1;  // Z
+		buf[1 * 11 + 1] = 1;  // E
+		buf[1 * 11 + 2] = 1;  // H
+		buf[1 * 11 + 3] = 1;  // N
+
+		buf[3 * 11 + 7] = 1;  // N
+		buf[3 * 11 + 8] = 1;  // A
+		buf[3 * 11 + 9] = 1;  // C
+		buf[3 * 11 + 10] = 1; // H
+	}
+	else if (m < 20)
+	{
+		buf[2 * 11 + 4] = 1;  // V
+		buf[2 * 11 + 5] = 1;  // I
+		buf[2 * 11 + 6] = 1;  // E
+		buf[2 * 11 + 7] = 1;  // R
+		buf[2 * 11 + 8] = 1;  // T
+		buf[2 * 11 + 9] = 1;  // E
+		buf[2 * 11 + 10] = 1; // L
+		h++;
+	}
+	else if (m < 25)
+	{
+		buf[1 * 11 + 0] = 1;  // Z
+		buf[1 * 11 + 1] = 1;  // E
+		buf[1 * 11 + 2] = 1;  // H
+		buf[1 * 11 + 3] = 1;  // N
+
+		buf[1 * 11 + 7] = 1;  // V
+		buf[1 * 11 + 8] = 1;  // O
+		buf[1 * 11 + 9] = 1;  // R
+
+		buf[3 * 11 + 0] = 1;  // H
+		buf[3 * 11 + 1] = 1;  // A
+		buf[3 * 11 + 2] = 1;  // L
+		buf[3 * 11 + 3] = 1;  // B
+		h++;
+	}
+	else if (m < 30)
+	{
+		buf[0 * 11 + 7] = 1;  // F
+		buf[0 * 11 + 8] = 1;  // Ü
+		buf[0 * 11 + 9] = 1;  // N
+		buf[0 * 11 + 10] = 1; // F
+
+		buf[1 * 11 + 7] = 1;  // V
+		buf[1 * 11 + 8] = 1;  // O
+		buf[1 * 11 + 9] = 1;  // R
+
+		buf[3 * 11 + 0] = 1;  // H
+		buf[3 * 11 + 1] = 1;  // A
+		buf[3 * 11 + 2] = 1;  // L
+		buf[3 * 11 + 3] = 1;  // B
+		h++;
+	}
+	else if (m < 35)
+	{
+		buf[3 * 11 + 0] = 1;  // H
+		buf[3 * 11 + 1] = 1;  // A
+		buf[3 * 11 + 2] = 1;  // L
+		buf[3 * 11 + 3] = 1;  // B
+		h++;
+	}
+	else if (m < 40)
+	{
 #ifdef USE_BUGFIX
-        buf[1 * 11 + 0] = 1;  // Z
-        buf[1 * 11 + 1] = 1;  // E
-        buf[1 * 11 + 2] = 1;  // H
-        buf[1 * 11 + 3] = 1;  // N
-        
-        buf[1 * 11 + 7] = 1;  // V
-        buf[1 * 11 + 8] = 1;  // O
-        buf[1 * 11 + 9] = 1;  // R
-        
-        buf[2 * 11 + 0] = 1;  // D
-        buf[2 * 11 + 1] = 1;  // R
-        buf[2 * 11 + 2] = 1;  // E
-        buf[2 * 11 + 3] = 1;  // I
-        buf[2 * 11 + 4] = 1;  // V
-        buf[2 * 11 + 5] = 1;  // I
-        buf[2 * 11 + 6] = 1;  // E
-        buf[2 * 11 + 7] = 1;  // R
-        buf[2 * 11 + 8] = 1;  // T
-        buf[2 * 11 + 9] = 1;  // E
-        buf[2 * 11 + 10] = 1; // L
+		buf[1 * 11 + 0] = 1;  // Z
+		buf[1 * 11 + 1] = 1;// E
+		buf[1 * 11 + 2] = 1;// H
+		buf[1 * 11 + 3] = 1;// N
+
+		buf[1 * 11 + 7] = 1;// V
+		buf[1 * 11 + 8] = 1;// O
+		buf[1 * 11 + 9] = 1;// R
+
+		buf[2 * 11 + 0] = 1;// D
+		buf[2 * 11 + 1] = 1;// R
+		buf[2 * 11 + 2] = 1;// E
+		buf[2 * 11 + 3] = 1;// I
+		buf[2 * 11 + 4] = 1;// V
+		buf[2 * 11 + 5] = 1;// I
+		buf[2 * 11 + 6] = 1;// E
+		buf[2 * 11 + 7] = 1;// R
+		buf[2 * 11 + 8] = 1;// T
+		buf[2 * 11 + 9] = 1;// E
+		buf[2 * 11 + 10] = 1;// L
 #else
 		buf[0 * 11 + 7] = 1;  // F
 		buf[0 * 11 + 8] = 1;  // Ü
@@ -511,31 +515,31 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
 		buf[3 * 11 + 2] = 1;  // L
 		buf[3 * 11 + 3] = 1;  // B
 #endif
-        h++;
-    }
-    else if (m < 45)
-    {
+		h++;
+	}
+	else if (m < 45)
+	{
 #ifdef USE_BUGFIX
-        buf[0 * 11 + 7] = 1;  // F
-        buf[0 * 11 + 8] = 1;  // Ü
-        buf[0 * 11 + 9] = 1;  // N
-        buf[0 * 11 + 10] = 1; // F
-        
-        buf[1 * 11 + 7] = 1;  // V
-        buf[1 * 11 + 8] = 1;  // O
-        buf[1 * 11 + 9] = 1;  // R
-        
-        buf[2 * 11 + 0] = 1;  // D
-        buf[2 * 11 + 1] = 1;  // R
-        buf[2 * 11 + 2] = 1;  // E
-        buf[2 * 11 + 3] = 1;  // I
-        buf[2 * 11 + 4] = 1;  // V
-        buf[2 * 11 + 5] = 1;  // I
-        buf[2 * 11 + 6] = 1;  // E
-        buf[2 * 11 + 7] = 1;  // R
-        buf[2 * 11 + 8] = 1;  // T
-        buf[2 * 11 + 9] = 1;  // E
-        buf[2 * 11 + 10] = 1; // L
+		buf[0 * 11 + 7] = 1;  // F
+		buf[0 * 11 + 8] = 1;// Ü
+		buf[0 * 11 + 9] = 1;// N
+		buf[0 * 11 + 10] = 1;// F
+
+		buf[1 * 11 + 7] = 1;// V
+		buf[1 * 11 + 8] = 1;// O
+		buf[1 * 11 + 9] = 1;// R
+
+		buf[2 * 11 + 0] = 1;// D
+		buf[2 * 11 + 1] = 1;// R
+		buf[2 * 11 + 2] = 1;// E
+		buf[2 * 11 + 3] = 1;// I
+		buf[2 * 11 + 4] = 1;// V
+		buf[2 * 11 + 5] = 1;// I
+		buf[2 * 11 + 6] = 1;// E
+		buf[2 * 11 + 7] = 1;// R
+		buf[2 * 11 + 8] = 1;// T
+		buf[2 * 11 + 9] = 1;// E
+		buf[2 * 11 + 10] = 1;// L
 #else
 		buf[1 * 11 + 0] = 1;  // Z
 		buf[1 * 11 + 1] = 1;  // E
@@ -552,142 +556,144 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
 		buf[3 * 11 + 2] = 1;  // L
 		buf[3 * 11 + 3] = 1;  // B
 #endif
-        h++;
-    }
-    else if (m < 50)
-    {
-        buf[2 * 11 + 0] = 1;  // D
-        buf[2 * 11 + 1] = 1;  // R
-        buf[2 * 11 + 2] = 1;  // E
-        buf[2 * 11 + 3] = 1;  // I
-        buf[2 * 11 + 4] = 1;  // V
-        buf[2 * 11 + 5] = 1;  // I
-        buf[2 * 11 + 6] = 1;  // E
-        buf[2 * 11 + 7] = 1;  // R
-        buf[2 * 11 + 8] = 1;  // T
-        buf[2 * 11 + 9] = 1;  // E
-        buf[2 * 11 + 10] = 1; // L
-        h++;
-    }
-    else if (m < 55)
-    {
-        buf[1 * 11 + 0] = 1;  // Z
-        buf[1 * 11 + 1] = 1;  // E
-        buf[1 * 11 + 2] = 1;  // H
-        buf[1 * 11 + 3] = 1;  // N
-        
-        buf[1 * 11 + 7] = 1;  // V
-        buf[1 * 11 + 8] = 1;  // O
-        buf[1 * 11 + 9] = 1;  // R
-        h++;
-    }
-    else
-    {
-        buf[0 * 11 + 7] = 1;  // F
-        buf[0 * 11 + 8] = 1;  // Ü
-        buf[0 * 11 + 9] = 1;  // N
-        buf[0 * 11 + 10] = 1; // F
-        
-        buf[1 * 11 + 7] = 1;  // V
-        buf[1 * 11 + 8] = 1;  // O
-        buf[1 * 11 + 9] = 1;  // R
-        h++;
-    }
+		h++;
+	}
+	else if (m < 50)
+	{
+		buf[2 * 11 + 0] = 1;  // D
+		buf[2 * 11 + 1] = 1;  // R
+		buf[2 * 11 + 2] = 1;  // E
+		buf[2 * 11 + 3] = 1;  // I
+		buf[2 * 11 + 4] = 1;  // V
+		buf[2 * 11 + 5] = 1;  // I
+		buf[2 * 11 + 6] = 1;  // E
+		buf[2 * 11 + 7] = 1;  // R
+		buf[2 * 11 + 8] = 1;  // T
+		buf[2 * 11 + 9] = 1;  // E
+		buf[2 * 11 + 10] = 1; // L
+		h++;
+	}
+	else if (m < 55)
+	{
+		buf[1 * 11 + 0] = 1;  // Z
+		buf[1 * 11 + 1] = 1;  // E
+		buf[1 * 11 + 2] = 1;  // H
+		buf[1 * 11 + 3] = 1;  // N
 
-    // check for hours overflow
-    if (h > 23) h = 0;
-    
-    // hours
-    if (h == 0 || h == 12)
-    {
-        buf[9 * 11 + 0] = 1;  // Z
-        buf[9 * 11 + 1] = 1;  // W
-        buf[9 * 11 + 2] = 1;  // Ö
-        buf[9 * 11 + 3] = 1;  // L
-        buf[9 * 11 + 4] = 1;  // F
-    }
-    else if (h == 1 || h == 13)
-    {
-        buf[4 * 11 + 0] = 1;  // E
-        buf[4 * 11 + 1] = 1;  // I
-        buf[4 * 11 + 2] = 1;  // N
-        if (m > 4) buf[4 * 11 + 3] = 1; // S
-    }
-    else if (h == 2 || h == 14)
-    {
-        buf[4 * 11 + 7] = 1;  // Z
-        buf[4 * 11 + 8] = 1;  // W
-        buf[4 * 11 + 9] = 1;  // E
-        buf[4 * 11 + 10] = 1; // I
-    }
-    else if (h == 3 || h == 15)
-    {
-        buf[5 * 11 + 0] = 1;  // D
-        buf[5 * 11 + 1] = 1;  // R
-        buf[5 * 11 + 2] = 1;  // E
-        buf[5 * 11 + 3] = 1;  // I
-    }
-    else if (h == 4 || h == 16)
-    {
-        buf[5 * 11 + 7] = 1;  // V
-        buf[5 * 11 + 8] = 1;  // I
-        buf[5 * 11 + 9] = 1;  // E
-        buf[5 * 11 + 10] = 1; // R
-    }
-    else if (h == 5 || h == 17)
-    {
-        buf[6 * 11 + 0] = 1;  // F
-        buf[6 * 11 + 1] = 1;  // Ü
-        buf[6 * 11 + 2] = 1;  // N
-        buf[6 * 11 + 3] = 1;  // F
-    }
-    else if (h == 6 || h == 18)
-    {
-        buf[6 * 11 + 6] = 1;  // S
-        buf[6 * 11 + 7] = 1;  // E
-        buf[6 * 11 + 8] = 1;  // C
-        buf[6 * 11 + 9] = 1;  // H
-        buf[6 * 11 + 10] = 1; // S
-    }
-    else if (h == 7 || h == 19)
-    {
-        buf[7 * 11 + 0] = 1;  // S
-        buf[7 * 11 + 1] = 1;  // I
-        buf[7 * 11 + 2] = 1;  // E
-        buf[7 * 11 + 3] = 1;  // B
-        buf[7 * 11 + 4] = 1;  // E
-        buf[7 * 11 + 5] = 1;  // N
-    }
-    else if (h == 8 || h == 20)
-    {
-        buf[7 * 11 + 7] = 1;  // A
-        buf[7 * 11 + 8] = 1;  // C
-        buf[7 * 11 + 9] = 1;  // H
-        buf[7 * 11 + 10] = 1; // T
-    }
-    else if (h == 9 || h == 21)
-    {
-        buf[8 * 11 + 0] = 1;  // N
-        buf[8 * 11 + 1] = 1;  // E
-        buf[8 * 11 + 2] = 1;  // U
-        buf[8 * 11 + 3] = 1;  // N
-    }
-    else if (h == 10 || h == 22)
-    {
-        buf[8 * 11 + 4] = 1;  // Z
-        buf[8 * 11 + 5] = 1;  // E
-        buf[8 * 11 + 6] = 1;  // H
-        buf[8 * 11 + 7] = 1;  // N
-    }
-    else if (h == 11 || h == 23)
-    {
-        buf[8 * 11 + 8] = 1;  // E
-        buf[8 * 11 + 9] = 1;  // L
-        buf[8 * 11 + 10] = 1; // F
-    }
-    
-    // set the new values as target for fade operation
-    this->set(buf, palette);
+		buf[1 * 11 + 7] = 1;  // V
+		buf[1 * 11 + 8] = 1;  // O
+		buf[1 * 11 + 9] = 1;  // R
+		h++;
+	}
+	else
+	{
+		buf[0 * 11 + 7] = 1;  // F
+		buf[0 * 11 + 8] = 1;  // Ü
+		buf[0 * 11 + 9] = 1;  // N
+		buf[0 * 11 + 10] = 1; // F
+
+		buf[1 * 11 + 7] = 1;  // V
+		buf[1 * 11 + 8] = 1;  // O
+		buf[1 * 11 + 9] = 1;  // R
+		h++;
+	}
+
+	// check for hours overflow
+	if (h > 23)
+		h = 0;
+
+	// hours
+	if (h == 0 || h == 12)
+	{
+		buf[9 * 11 + 0] = 1;  // Z
+		buf[9 * 11 + 1] = 1;  // W
+		buf[9 * 11 + 2] = 1;  // Ö
+		buf[9 * 11 + 3] = 1;  // L
+		buf[9 * 11 + 4] = 1;  // F
+	}
+	else if (h == 1 || h == 13)
+	{
+		buf[4 * 11 + 0] = 1;  // E
+		buf[4 * 11 + 1] = 1;  // I
+		buf[4 * 11 + 2] = 1;  // N
+		if (m > 4)
+			buf[4 * 11 + 3] = 1; // S
+	}
+	else if (h == 2 || h == 14)
+	{
+		buf[4 * 11 + 7] = 1;  // Z
+		buf[4 * 11 + 8] = 1;  // W
+		buf[4 * 11 + 9] = 1;  // E
+		buf[4 * 11 + 10] = 1; // I
+	}
+	else if (h == 3 || h == 15)
+	{
+		buf[5 * 11 + 0] = 1;  // D
+		buf[5 * 11 + 1] = 1;  // R
+		buf[5 * 11 + 2] = 1;  // E
+		buf[5 * 11 + 3] = 1;  // I
+	}
+	else if (h == 4 || h == 16)
+	{
+		buf[5 * 11 + 7] = 1;  // V
+		buf[5 * 11 + 8] = 1;  // I
+		buf[5 * 11 + 9] = 1;  // E
+		buf[5 * 11 + 10] = 1; // R
+	}
+	else if (h == 5 || h == 17)
+	{
+		buf[6 * 11 + 0] = 1;  // F
+		buf[6 * 11 + 1] = 1;  // Ü
+		buf[6 * 11 + 2] = 1;  // N
+		buf[6 * 11 + 3] = 1;  // F
+	}
+	else if (h == 6 || h == 18)
+	{
+		buf[6 * 11 + 6] = 1;  // S
+		buf[6 * 11 + 7] = 1;  // E
+		buf[6 * 11 + 8] = 1;  // C
+		buf[6 * 11 + 9] = 1;  // H
+		buf[6 * 11 + 10] = 1; // S
+	}
+	else if (h == 7 || h == 19)
+	{
+		buf[7 * 11 + 0] = 1;  // S
+		buf[7 * 11 + 1] = 1;  // I
+		buf[7 * 11 + 2] = 1;  // E
+		buf[7 * 11 + 3] = 1;  // B
+		buf[7 * 11 + 4] = 1;  // E
+		buf[7 * 11 + 5] = 1;  // N
+	}
+	else if (h == 8 || h == 20)
+	{
+		buf[7 * 11 + 7] = 1;  // A
+		buf[7 * 11 + 8] = 1;  // C
+		buf[7 * 11 + 9] = 1;  // H
+		buf[7 * 11 + 10] = 1; // T
+	}
+	else if (h == 9 || h == 21)
+	{
+		buf[8 * 11 + 0] = 1;  // N
+		buf[8 * 11 + 1] = 1;  // E
+		buf[8 * 11 + 2] = 1;  // U
+		buf[8 * 11 + 3] = 1;  // N
+	}
+	else if (h == 10 || h == 22)
+	{
+		buf[8 * 11 + 4] = 1;  // Z
+		buf[8 * 11 + 5] = 1;  // E
+		buf[8 * 11 + 6] = 1;  // H
+		buf[8 * 11 + 7] = 1;  // N
+	}
+	else if (h == 11 || h == 23)
+	{
+		buf[8 * 11 + 8] = 1;  // E
+		buf[8 * 11 + 9] = 1;  // L
+		buf[8 * 11 + 10] = 1; // F
+	}
+
+	// set the new values as target for fade operation
+	this->set(buf, palette);
 }
 
 //---------------------------------------------------------------------------------------
@@ -705,7 +711,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms, palette_entry p
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[])
 {
-    this->set(buf, palette, false);
+	this->set(buf, palette, false);
 }
 
 //---------------------------------------------------------------------------------------
@@ -722,15 +728,16 @@ void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[])
 //    immediately: if true, display buffer immediately; fade to new colors if false
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[], bool immediately)
+void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[],
+		bool immediately)
 {
-    this->setBuffer(this->targetValues, buf, palette);
+	this->setBuffer(this->targetValues, buf, palette);
 
-    if(immediately) 
-    {
-        this->setBuffer(this->currentValues, buf, palette);
-        this->show();
-    }
+	if (immediately)
+	{
+		this->setBuffer(this->currentValues, buf, palette);
+		this->show();
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -745,31 +752,34 @@ void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[], bool im
 //    palette: colors for indexed source buffer
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source, palette_entry palette[])
+void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source,
+		palette_entry palette[])
 {
-    uint32_t mapping, palette_index;
-    
-    // cast source to 32 bit pointer to ensure 32 bit aligned access
-    uint32_t *buf = (uint32_t*)source;
-    // this holds the current 4 bytes
-    uint32_t currentDWord;
-    // this is a pointer to the current 4 bytes for access as single bytes
-    uint8_t *currentBytes = (uint8_t*)&currentDWord;
-    // this counts bytes from 0...3
-    uint32_t byteCounter = 0;
-    for(int i = 0; i < NUM_PIXELS; i++)
-    {
-        // get next 4 bytes
-        if(byteCounter == 0) currentDWord = buf[i>>2];
+	uint32_t mapping, palette_index;
 
-        mapping = led_mapping[i] * 3;
-        palette_index = currentBytes[byteCounter];
-        target[mapping + 0] = palette[palette_index].r;
-        target[mapping + 1] = palette[palette_index].g;
-        target[mapping + 2] = palette[palette_index].b;
+	// cast source to 32 bit pointer to ensure 32 bit aligned access
+	uint32_t *buf = (uint32_t*) source;
+	// this holds the current 4 bytes
+	uint32_t currentDWord;
+	// this is a pointer to the current 4 bytes for access as single bytes
+	uint8_t *currentBytes = (uint8_t*) &currentDWord;
+	// this counts bytes from 0...3
+	uint32_t byteCounter = 0;
+	for (int i = 0; i < NUM_PIXELS; i++)
+	{
+		// get next 4 bytes
+		if (byteCounter == 0)
+			currentDWord = buf[i >> 2];
 
-        if(++byteCounter>3) byteCounter = 0;
-    }
+		mapping = led_mapping[i] * 3;
+		palette_index = currentBytes[byteCounter];
+		target[mapping + 0] = palette[palette_index].r;
+		target[mapping + 1] = palette[palette_index].g;
+		target[mapping + 2] = palette[palette_index].b;
+
+		if (++byteCounter > 3)
+			byteCounter = 0;
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -785,16 +795,22 @@ void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source, palett
 void LEDFunctionsClass::fade()
 {
 	int delta;
-    for (int i = 0; i < NUM_PIXELS * 3; i++)
-    {
-    	delta = this->targetValues[i] - this->currentValues[i];
-    	if(delta > 64) this->currentValues[i] += 8;
-    	else if(delta > 16) this->currentValues[i] += 4;
-    	else if(delta > 0) this->currentValues[i]++;
-    	else if(delta < -64) this->currentValues[i] -= 8;
-    	else if(delta < -16) this->currentValues[i] -= 4;
-    	else if(delta < 0) this->currentValues[i]--;
-    }
+	for (int i = 0; i < NUM_PIXELS * 3; i++)
+	{
+		delta = this->targetValues[i] - this->currentValues[i];
+		if (delta > 64)
+			this->currentValues[i] += 8;
+		else if (delta > 16)
+			this->currentValues[i] += 4;
+		else if (delta > 0)
+			this->currentValues[i]++;
+		else if (delta < -64)
+			this->currentValues[i] -= 8;
+		else if (delta < -16)
+			this->currentValues[i] -= 4;
+		else if (delta < 0)
+			this->currentValues[i]--;
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -807,17 +823,17 @@ void LEDFunctionsClass::fade()
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::show()
 {
-    uint8_t *data = this->currentValues;
-    
-    // copy current color values to LED object and display it
-    for (int i = 0; i < NUM_PIXELS; i++)
-    {
-        this->pixels->setPixelColor(i, pixels->Color(
-            ((int)data[i * 3 + 0] * this->brightness) >> 8,
-            ((int)data[i * 3 + 1] * this->brightness) >> 8,
-            ((int)data[i * 3 + 2] * this->brightness) >> 8));
-    }
-    this->pixels->show();
+	uint8_t *data = this->currentValues;
+
+	// copy current color values to LED object and display it
+	for (int i = 0; i < NUM_PIXELS; i++)
+	{
+		this->pixels->setPixelColor(i,
+				pixels->Color(((int) data[i * 3 + 0] * this->brightness) >> 8,
+						((int) data[i * 3 + 1] * this->brightness) >> 8,
+						((int) data[i * 3 + 2] * this->brightness) >> 8));
+	}
+	this->pixels->show();
 }
 
 //---------------------------------------------------------------------------------------
@@ -830,7 +846,7 @@ void LEDFunctionsClass::show()
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::showHeart(bool show)
 {
-    this->doHeart = show;
+	this->doHeart = show;
 }
 
 //---------------------------------------------------------------------------------------
@@ -843,7 +859,7 @@ void LEDFunctionsClass::showHeart(bool show)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::showStars(bool show)
 {
-    this->doStars = show;
+	this->doStars = show;
 }
 
 //---------------------------------------------------------------------------------------
@@ -856,7 +872,7 @@ void LEDFunctionsClass::showStars(bool show)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::showMatrix(bool show)
 {
-    this->doMatrix = show;
+	this->doMatrix = show;
 }
 
 //---------------------------------------------------------------------------------------
@@ -869,65 +885,66 @@ void LEDFunctionsClass::showMatrix(bool show)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::matrix()
 {
-    uint8_t *buf = this->currentValues;
-    
-    // sort by y coordinate for correct overlapping
-    matrix_object temp;
-    for(int i=0; i<NUM_MATRIX_OBJECTS; i++)
-    {
-        for(int j=i+1; j<NUM_MATRIX_OBJECTS; j++)
-        {
-            if(matrix_objects[i].y < matrix_objects[j].y)
-            {
-                temp = matrix_objects[i];
-                matrix_objects[i] = matrix_objects[j];
-                matrix_objects[j] = temp;
-            }
-        }
-    }
+	uint8_t *buf = this->currentValues;
 
-    // clear buffer    
-    for(int i=0; i<NUM_PIXELS*3; i++) buf[i] = 0;
-    
-    // iterate over all matrix objects
-    for(int i=0; i<NUM_MATRIX_OBJECTS; i++)
-    {
-    	// check if current matrix object has left the screen
-        if(matrix_objects[i].y - MATRIX_GRADIENT_LENGTH > 10)
-        {
-            // recreate object with new x, y and speed
-            matrix_objects[i].x = random(11);
-            matrix_objects[i].y = random(25) - 25;
-            matrix_objects[i].speed = MATRIX_SPEED;
-            matrix_objects[i].count = 0;
-        }
-        else
-        {
-        	// update position
-            matrix_objects[i].count += matrix_objects[i].speed;
-            if(matrix_objects[i].count > 30000)
-            {
-                matrix_objects[i].count -= 30000;
-                matrix_objects[i].y++;
-            }
-        }
+	// sort by y coordinate for correct overlapping
+	matrix_object temp;
+	for (int i = 0; i < NUM_MATRIX_OBJECTS; i++)
+	{
+		for (int j = i + 1; j < NUM_MATRIX_OBJECTS; j++)
+		{
+			if (matrix_objects[i].y < matrix_objects[j].y)
+			{
+				temp = matrix_objects[i];
+				matrix_objects[i] = matrix_objects[j];
+				matrix_objects[j] = temp;
+			}
+		}
+	}
 
-        // draw the gradient of one matrix object
-        int y = matrix_objects[i].y;
-        int x = matrix_objects[i].x;
-        for(int j=0; j<MATRIX_GRADIENT_LENGTH; j++)
-        {
-            int ofs = led_mapping[x + y*11] * 3;
-            if(y >= 0 && y < 10)
-            {            
-                buf[ofs + 0] = matrix_gradient[j].r;
-                buf[ofs + 1] = matrix_gradient[j].g;
-                buf[ofs + 2] = matrix_gradient[j].b;
-            }
-            y--;
-        }
-    }
-    this->show();
+	// clear buffer
+	for (int i = 0; i < NUM_PIXELS * 3; i++)
+		buf[i] = 0;
+
+	// iterate over all matrix objects
+	for (int i = 0; i < NUM_MATRIX_OBJECTS; i++)
+	{
+		// check if current matrix object has left the screen
+		if (matrix_objects[i].y - MATRIX_GRADIENT_LENGTH > 10)
+		{
+			// recreate object with new x, y and speed
+			matrix_objects[i].x = random(11);
+			matrix_objects[i].y = random(25) - 25;
+			matrix_objects[i].speed = MATRIX_SPEED;
+			matrix_objects[i].count = 0;
+		}
+		else
+		{
+			// update position
+			matrix_objects[i].count += matrix_objects[i].speed;
+			if (matrix_objects[i].count > 30000)
+			{
+				matrix_objects[i].count -= 30000;
+				matrix_objects[i].y++;
+			}
+		}
+
+		// draw the gradient of one matrix object
+		int y = matrix_objects[i].y;
+		int x = matrix_objects[i].x;
+		for (int j = 0; j < MATRIX_GRADIENT_LENGTH; j++)
+		{
+			int ofs = led_mapping[x + y * 11] * 3;
+			if (y >= 0 && y < 10)
+			{
+				buf[ofs + 0] = matrix_gradient[j].r;
+				buf[ofs + 1] = matrix_gradient[j].g;
+				buf[ofs + 2] = matrix_gradient[j].b;
+			}
+			y--;
+		}
+	}
+	this->show();
 }
 
 //---------------------------------------------------------------------------------------
@@ -940,13 +957,14 @@ void LEDFunctionsClass::matrix()
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::stars()
 {
-    uint8_t *buf = this->currentValues;
+	uint8_t *buf = this->currentValues;
 
-    // clear buffer
-    for(int i=0; i<NUM_PIXELS*3; i++) buf[i] = 0;
+	// clear buffer
+	for (int i = 0; i < NUM_PIXELS * 3; i++)
+		buf[i] = 0;
 
-    int x, y, b, offset;
-	for(int i=0; i<NUM_STARS; i++)
+	int x, y, b, offset;
+	for (int i = 0; i < NUM_STARS; i++)
 	{
 		// fetch coordinates and brightness of current star
 		x = this->star_objects[i].x;
@@ -954,16 +972,16 @@ void LEDFunctionsClass::stars()
 		b = this->star_objects[i].brightness;
 
 		// write brightness to target buffer
-		offset = led_mapping[x + y*11] * 3;
+		offset = led_mapping[x + y * 11] * 3;
 		buf[offset + 0] = b;
 		buf[offset + 1] = b;
 		buf[offset + 2] = b;
 
 		// increase or decrease brightness depending on current state
-		if(this->star_objects[i].state == 0)
+		if (this->star_objects[i].state == 0)
 		{
 			this->star_objects[i].brightness += this->star_objects[i].speed;
-			if(this->star_objects[i].brightness >= 255)
+			if (this->star_objects[i].brightness >= 255)
 			{
 				// switch to decreasing mode
 				this->star_objects[i].brightness = 255;
@@ -973,7 +991,7 @@ void LEDFunctionsClass::stars()
 		else
 		{
 			this->star_objects[i].brightness -= this->star_objects[i].speed;
-			if(this->star_objects[i].brightness <= 0)
+			if (this->star_objects[i].brightness <= 0)
 			{
 				// switch to increasing mode and get new random coordinates
 				this->star_objects[i].brightness = 0;
@@ -984,7 +1002,7 @@ void LEDFunctionsClass::stars()
 	}
 
 	// send current values to LEDs
-    this->show();
+	this->show();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1015,30 +1033,30 @@ void LEDFunctionsClass::heart()
     palette[1] = {(uint8_t)this->heartBrightness, 0, 0};
     this->set(heart, palette, true);
     
-    switch(this->heartState)
-    {
-        case 0:
-            if(this->heartBrightness >= 255) this->heartState = 1;
-            else this->heartBrightness += 32;
-            break;
-            
-        case 1:
-            if(this->heartBrightness < 128) this->heartState = 2;
-            else this->heartBrightness -= 32;
-            break;
+    switch (this->heartState)
+	{
+	case 0:
+		if (this->heartBrightness >= 255) this->heartState = 1;
+		else this->heartBrightness += 32;
+		break;
 
-        case 2:
-            if(this->heartBrightness >= 255) this->heartState = 3;
-            else this->heartBrightness += 32;
-            break;
+	case 1:
+		if (this->heartBrightness < 128) this->heartState = 2;
+		else this->heartBrightness -= 32;
+		break;
 
-        case 3:
-        default:
-            if(this->heartBrightness <= 0) this->heartState = 0;
-            else this->heartBrightness -= 4;
-            break;
-    }
+	case 2:
+		if (this->heartBrightness >= 255) this->heartState = 3;
+		else this->heartBrightness += 32;
+		break;
 
-    if(this->heartBrightness > 255) this->heartBrightness = 255;
-    if(this->heartBrightness < 0) this->heartBrightness = 0;
+	case 3:
+	default:
+		if (this->heartBrightness <= 0) this->heartState = 0;
+		else this->heartBrightness -= 4;
+		break;
+	}
+
+	if (this->heartBrightness > 255) this->heartBrightness = 255;
+	if (this->heartBrightness < 0) this->heartBrightness = 0;
 }
