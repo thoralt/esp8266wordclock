@@ -1,3 +1,26 @@
+//	ESP8266 Wordclock
+//	Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
+//
+//		This is the configuration module. It contains methods to load/save the
+//		configuration from/to the internal EEPROM (simulated EEPROM in flash).
+//		Data is loaded into this->eeprom_data[EEPROM_SIZE] which shares RAM with
+//		this->config. Configuration variables are copied to public class members
+//		ntpserver, heartbeat, ... where they can be used by other modules. Upon
+//		save, the public members are copied back to this->config/this->eeprom_data[]
+//		and then written to the EEPROM.
+//
+//	This program is free software: you can redistribute it and/or modify
+//	it under the terms of the GNU General Public License as published by
+//	the Free Software Foundation, either version 3 of the License, or
+//	(at your option) any later version.
+//
+//	This program is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU General Public License for more details.
+//
+//	You should have received a copy of the GNU General Public License
+//	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Arduino.h>
 #include <EEPROM.h>
 #include "config.h"
@@ -8,11 +31,11 @@
 ConfigClass Config = ConfigClass();
 
 //---------------------------------------------------------------------------------------
+// ConfigClass
 //
+// Constructor, loads default values
 //
-// ...
-//
-// ->
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
 ConfigClass::ConfigClass()
@@ -21,11 +44,11 @@ ConfigClass::ConfigClass()
 }
 
 //---------------------------------------------------------------------------------------
+// ~ConfigClass
 //
+// destructor
 //
-// ...
-//
-// ->
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
 ConfigClass::~ConfigClass()
@@ -33,11 +56,11 @@ ConfigClass::~ConfigClass()
 }
 
 //---------------------------------------------------------------------------------------
+// begin
 //
+// Initializes the class and loads current configuration from EEPROM into class members.
 //
-// ...
-//
-// ->
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
 void ConfigClass::begin()
@@ -47,11 +70,11 @@ void ConfigClass::begin()
 }
 
 //---------------------------------------------------------------------------------------
+// save
 //
+// Copies the current class member values to EEPROM buffer and writes it to the EEPROM.
 //
-// ...
-//
-// ->
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
 void ConfigClass::save()
@@ -67,32 +90,46 @@ void ConfigClass::save()
 }
 
 //---------------------------------------------------------------------------------------
+// reset
 //
+// Sets default values in EEPROM buffer and member variables.
 //
-// ...
-//
-// ->
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
 void ConfigClass::reset()
 {
     this->config->magic = 0xDEADBEEF;
     this->config->bg = {0, 0, 0};
+    this->bg = this->config->bg;
+
     this->config->fg = {255, 255, 255};
+    this->fg = this->config->fg;
+
     this->config->s = {32, 0, 21};
+    this->s = this->config->s;
+
     this->config->heartbeat = true;
-    this->ntpserver[0] = 129;
-    this->ntpserver[1] = 6;
-    this->ntpserver[2] = 15;
-    this->ntpserver[3] = 28;
+    this->heartbeat = this->config->heartbeat;
+
+    this->config->ntpserver[0] = 129;
+    this->config->ntpserver[1] = 6;
+    this->config->ntpserver[2] = 15;
+    this->config->ntpserver[3] = 28;
+    this->ntpserver[0] = this->config->ntpserver[0];
+    this->ntpserver[1] = this->config->ntpserver[1];
+    this->ntpserver[2] = this->config->ntpserver[2];
+    this->ntpserver[3] = this->config->ntpserver[3];
 }
 
 //---------------------------------------------------------------------------------------
+// load
 //
+// Reads the content of the EEPROM into the EEPROM buffer and copies the values to the
+// public member variables. Resets (and saves) the values to their defaults if the
+// EEPROM data is not initialized.
 //
-// ...
-//
-// ->
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
 void ConfigClass::load()

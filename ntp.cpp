@@ -1,3 +1,28 @@
+//	ESP8266 Wordclock
+//	Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
+//
+//		This module contains a simple NTP client. NTP packets are sent using UDP to a
+//		configurable NTP server. The server reply is processed and a callback is
+//		executed to notifiy the calling application of the current time. The internal
+//		state machine is called from an internal timer to take care of timeouts, the
+//		NTP request is retried automatically if no reply is being received. The request
+//		is being repeated every 59 minutes, so the calling module is updated regularly.
+//
+//	This program is free software: you can redistribute it and/or modify
+//	it under the terms of the GNU General Public License as published by
+//	the Free Software Foundation, either version 3 of the License, or
+//	(at your option) any later version.
+//
+//	This program is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU General Public License for more details.
+//
+//	You should have received a copy of the GNU General Public License
+//	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//	This code is based on (heavily modified):
+//	https://github.com/sandeepmistry/esp8266-Arduino/blob/master/esp8266com/esp8266/libraries/ESP8266WiFi/examples/NTPClient
 #include <Arduino.h>
 #include "ntp.h"
 
@@ -78,7 +103,8 @@ IPAddress NtpClass::getServer()
 //
 // -> ip: Address of an NTP server
 //    callback: Function to receive the current time (hours, minutes, seconds, ms)
-//    timezone: Hours difference from UTC (will be added to the received time)
+//    timezone: Hours difference from UTC (will be added to the received time, can be
+//              negative)
 // <- --
 //---------------------------------------------------------------------------------------
 void NtpClass::begin(IPAddress ip, TNtpCallback callback, int timezone)
@@ -90,7 +116,6 @@ void NtpClass::begin(IPAddress ip, TNtpCallback callback, int timezone)
     this->udp.begin(LOCAL_PORT);
     
     // wait 2 seconds before starting first request
-    // this->state = NtpState::startRequest;
     Serial.println("NtpClass::begin() Waiting 2 seconds");
     this->state = NtpState::waitingForReload;
     this->timer = NTP_RELOAD_INTERVAL - 2000;
@@ -106,6 +131,7 @@ void NtpClass::begin(IPAddress ip, TNtpCallback callback, int timezone)
 //---------------------------------------------------------------------------------------
 void NtpClass::tickerFunction()
 {
+	// increment timer variable
     this->timer += TIMER_RESOLUTION;
     
     switch(this->state)
@@ -152,7 +178,7 @@ void NtpClass::tickerFunction()
 //---------------------------------------------------------------------------------------
 // parse
 //
-// Reads the received UDP package and decodes the current time, stores result in (this)
+// Reads the received UDP packet and decodes the current time, stores result in (this)
 //
 // -> --
 // <- --
