@@ -20,7 +20,8 @@
 #ifndef _BRIGHTNESS_H_
 #define _BRIGHTNESS_H_
 
-#define NUM_ADC_VALUES 256
+#define ALPHA(x) ((uint16_t)(x * 65535.0f))
+#define FILTER_COEFFICIENT ALPHA(0.01)
 
 class BrightnessClass
 {
@@ -28,13 +29,11 @@ public:
     BrightnessClass();
     uint32_t value();
 
-    uint32_t adcAvg = 0;
+    uint32_t avg = 0;
     
 private:
     uint32_t getBrightnessForADCValue(uint32_t adcValue);
-    int filter(int input);
-
-    int adcValues[NUM_ADC_VALUES];
+    uint32_t filter(uint16_t input);
 };
 
 extern BrightnessClass Brightness;

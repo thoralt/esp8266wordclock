@@ -37,12 +37,27 @@ BrightnessClass Brightness = BrightnessClass();
 BrightnessClass::BrightnessClass()
 {
     int adc = analogRead(A0);
-    for(int i=0; i<NUM_ADC_VALUES; i++) adcValues[i] = adc;
-    this->adcAvg = adc;
+    this->avg = adc;
 }
 
-int BrightnessClass::filter(int input)
+//---------------------------------------------------------------------------------------
+// filter
+//
+// Exponential moving average filter using integer arithmetics. Implements the
+// following behaviour:
+//
+//   output = (1-coeff)*last_output + coeff*input
+//
+// FILTER_COEFFICIENT is defined as fixed point number with 16.16 bits resolution.
+//
+// -> input: filter input [0...65535]
+// <- --
+//---------------------------------------------------------------------------------------
+uint32_t BrightnessClass::filter(uint16_t input)
 {
+	uint32_t tmp = (65536-FILTER_COEFFICIENT)*this->avg
+			+ (uint32_t)input*FILTER_COEFFICIENT;
+	return (tmp + 32768) >> 16;
 }
 
 //---------------------------------------------------------------------------------------
@@ -95,13 +110,10 @@ uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 //---------------------------------------------------------------------------------------
 uint32_t BrightnessClass::value()
 {
-    int adc = analogRead(A0);
-    for(int i=1; i<NUM_ADC_VALUES; i++) adcValues[i-1] = adcValues[i];
-    adcValues[NUM_ADC_VALUES-1] = adc;
+
+    // read next ADC value and apply filter
+    this->avg = this->filter(analogRead(A0));
     
-    int avg = 0;
-    for(int i=0; i<NUM_ADC_VALUES; i++) avg += adcValues[i];
-    avg /= NUM_ADC_VALUES;
-    this->adcAvg = avg;
+    // calculate brightness value for filtered ADC value
     return this->getBrightnessForADCValue(avg);
 }
