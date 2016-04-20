@@ -203,7 +203,7 @@ void LEDFunctionsClass::randomizeStar(int index)
 
 	this->star_objects[index].x = x;
 	this->star_objects[index].y = y;
-	this->star_objects[index].speed = 1 + random(3);
+	this->star_objects[index].speed = 15 + random(15);
 }
 
 //---------------------------------------------------------------------------------------
@@ -970,6 +970,8 @@ void LEDFunctionsClass::stars()
 		x = this->star_objects[i].x;
 		y = this->star_objects[i].y;
 		b = this->star_objects[i].brightness;
+		if(b < 0) b = 0;
+		if(b > 255) b = 255;
 
 		// write brightness to target buffer
 		offset = led_mapping[x + y * 11] * 3;
@@ -991,7 +993,7 @@ void LEDFunctionsClass::stars()
 		else
 		{
 			this->star_objects[i].brightness -= this->star_objects[i].speed;
-			if (this->star_objects[i].brightness <= 0)
+			if (this->star_objects[i].brightness < -2000)
 			{
 				// switch to increasing mode and get new random coordinates
 				this->star_objects[i].brightness = 0;

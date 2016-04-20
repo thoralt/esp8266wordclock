@@ -109,7 +109,7 @@ void WebServerClass::process()
 //---------------------------------------------------------------------------------------
 bool WebServerClass::serveFile(String path)
 {
-	Serial.println("serveFile: " + path);
+	Serial.println("WebServerClass::serveFile(): " + path);
 	if (path.endsWith("/"))
 		path += "index.html";
 	if (SPIFFS.exists(path))
@@ -274,8 +274,7 @@ void WebServerClass::extractColor(String argName, palette_entry *result)
 {
 	char c[3];
 
-	if (this->server->hasArg(argName)
-			&& this->server->arg(argName).length() == 6)
+	if (this->server->hasArg(argName) && this->server->arg(argName).length() == 6)
 	{
 		String color = this->server->arg(argName);
 		color.substring(0, 2).toCharArray(c, sizeof(c));
@@ -343,8 +342,7 @@ void WebServerClass::handleLoadConfig()
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleMatrix()
 {
-	showMatrix = (this->server->hasArg("state")
-			&& this->server->arg("state") == "1");
+	showMatrix = (this->server->hasArg("state") && this->server->arg("state") == "1");
 	this->server->send(200, "text/plain", "OK");
 }
 
@@ -358,8 +356,7 @@ void WebServerClass::handleMatrix()
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleHeartbeat()
 {
-	Config.heartbeat = (this->server->hasArg("state")
-			&& this->server->arg("state") == "1");
+	Config.heartbeat = (this->server->hasArg("state") && this->server->arg("state") == "1");
 	this->server->send(200, "text/plain", "OK");
 }
 
@@ -373,8 +370,7 @@ void WebServerClass::handleHeartbeat()
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleStars()
 {
-	showStars = (this->server->hasArg("state")
-			&& this->server->arg("state") == "1");
+	showStars = (this->server->hasArg("state") && this->server->arg("state") == "1");
 	this->server->send(200, "text/plain", "OK");
 }
 
@@ -388,8 +384,7 @@ void WebServerClass::handleStars()
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleHourglass()
 {
-	showHourglass = (this->server->hasArg("state")
-			&& this->server->arg("state") == "1");
+	showHourglass = (this->server->hasArg("state") && this->server->arg("state") == "1");
 	this->server->send(200, "text/plain", "OK");
 }
 
@@ -403,8 +398,7 @@ void WebServerClass::handleHourglass()
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleHeart()
 {
-	showHeart = (this->server->hasArg("state")
-			&& this->server->arg("state") == "1");
+	showHeart = (this->server->hasArg("state") && this->server->arg("state") == "1");
 	this->server->send(200, "text/plain", "OK");
 }
 
