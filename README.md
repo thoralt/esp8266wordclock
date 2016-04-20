@@ -10,3 +10,4 @@ This is my interpretation of the popular wordclock project. Key features:
 - WiFiManager allows for easy configuration when WiFi network is not yet configured
 - NTP client regularly fetches time
 - integrated web server handles configuration interface for colors, time server etc.
+- automatic brightness using LDR 
