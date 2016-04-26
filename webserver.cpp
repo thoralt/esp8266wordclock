@@ -132,32 +132,19 @@ bool WebServerClass::serveFile(String path)
 //---------------------------------------------------------------------------------------
 String WebServerClass::contentType(String filename)
 {
-	if (this->server->hasArg("download"))
-		return "application/octet-stream";
-	else if (filename.endsWith(".htm"))
-		return "text/html";
-	else if (filename.endsWith(".html"))
-		return "text/html";
-	else if (filename.endsWith(".css"))
-		return "text/css";
-	else if (filename.endsWith(".js"))
-		return "application/javascript";
-	else if (filename.endsWith(".png"))
-		return "image/png";
-	else if (filename.endsWith(".gif"))
-		return "image/gif";
-	else if (filename.endsWith(".jpg"))
-		return "image/jpeg";
-	else if (filename.endsWith(".ico"))
-		return "image/x-icon";
-	else if (filename.endsWith(".xml"))
-		return "text/xml";
-	else if (filename.endsWith(".pdf"))
-		return "application/x-pdf";
-	else if (filename.endsWith(".zip"))
-		return "application/x-zip";
-	else if (filename.endsWith(".gz"))
-		return "application/x-gzip";
+	if (this->server->hasArg("download")) return "application/octet-stream";
+	else if (filename.endsWith(".htm")) return "text/html";
+	else if (filename.endsWith(".html")) return "text/html";
+	else if (filename.endsWith(".css")) return "text/css";
+	else if (filename.endsWith(".js")) return "application/javascript";
+	else if (filename.endsWith(".png")) return "image/png";
+	else if (filename.endsWith(".gif")) return "image/gif";
+	else if (filename.endsWith(".jpg")) return "image/jpeg";
+	else if (filename.endsWith(".ico")) return "image/x-icon";
+	else if (filename.endsWith(".xml")) return "text/xml";
+	else if (filename.endsWith(".pdf")) return "application/x-pdf";
+	else if (filename.endsWith(".zip")) return "application/x-zip";
+	else if (filename.endsWith(".gz")) return "application/x-gzip";
 	return "text/plain";
 }
 
@@ -270,7 +257,7 @@ void WebServerClass::handleInfo()
 //	result: Pointer to palette_entry struct to receive result
 // <- --
 //---------------------------------------------------------------------------------------
-void WebServerClass::extractColor(String argName, palette_entry *result)
+void WebServerClass::extractColor(String argName, palette_entry& result)
 {
 	char c[3];
 
@@ -278,11 +265,11 @@ void WebServerClass::extractColor(String argName, palette_entry *result)
 	{
 		String color = this->server->arg(argName);
 		color.substring(0, 2).toCharArray(c, sizeof(c));
-		result->r = strtol(c, NULL, 16);
+		result.r = strtol(c, NULL, 16);
 		color.substring(2, 4).toCharArray(c, sizeof(c));
-		result->g = strtol(c, NULL, 16);
+		result.g = strtol(c, NULL, 16);
 		color.substring(4, 6).toCharArray(c, sizeof(c));
-		result->b = strtol(c, NULL, 16);
+		result.b = strtol(c, NULL, 16);
 	}
 }
 
@@ -298,9 +285,9 @@ void WebServerClass::extractColor(String argName, palette_entry *result)
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleSetColor()
 {
-	this->extractColor("fg", &Config.fg);
-	this->extractColor("bg", &Config.bg);
-	this->extractColor("s", &Config.s);
+	this->extractColor("fg", Config.fg);
+	this->extractColor("bg", Config.bg);
+	this->extractColor("s", Config.s);
 	this->server->send(200, "text/plain", "OK");
 }
 

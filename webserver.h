@@ -55,7 +55,7 @@ private:
 	void handleInfo();
 	void handleGetNtpServer();
 	void handleSetNtpServer();
-	void extractColor(String argName, palette_entry *result);
+	void extractColor(String argName, palette_entry& result);
 };
 
 extern WebServerClass WebServer;
