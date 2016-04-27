@@ -19,6 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ledfunctions.h"
+#include <vector>
 
 //---------------------------------------------------------------------------------------
 // global instance
@@ -44,6 +45,48 @@ static const uint32_t PROGMEM led_mapping[NUM_PIXELS] =
 	98,  97,  96,  95,  94,  93,  92,  91,  90,  89,  88,
 	99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
 	112, 111, 110, 113
+};
+
+typedef struct _leds_template_t
+{
+	int param0, param1, param2;
+	const std::vector<int> LEDs;
+} leds_template_t;
+
+const std::vector<leds_template_t> minutes_template =
+{
+	{0,  0,  4, {107, 108, 109}},                                  // UHR
+	{0,  5,  9, {7, 8, 9, 10, 40, 41, 42, 43}},                    // FÜNF NACH
+	{0, 10, 14, {11, 12, 13, 14, 40, 41, 42, 43}},                 // ZEHN NACH
+	{1, 15, 19, {26, 27, 28, 29, 30, 31, 32}},                     // VIERTEL
+	{1, 20, 24, {11, 12, 13, 14, 18, 19, 20, 33, 34, 35, 36}},     // ZEHN VOR HALB
+	{1, 25, 29, {7, 8, 9, 10, 18, 19, 20, 33, 34, 35, 36}},        // FÜNF VOR HALB
+	{1, 30, 34, {33, 34, 35, 36}},                                 // HALB
+	{1, 35, 39, {7, 8, 9, 10, 40, 41, 42, 43, 33, 34, 35, 36}},    // FÜNF NACH HALB
+	{1, 35, 39, {7, 8, 9, 10, 40, 41, 42, 43, 33, 34, 35, 36}},    // FÜNF NACH HALB
+/*	{1, 35, 39, {11, 12, 13, 14, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }}, // ZEHN VOR DREIVIERTEL */
+	{1, 40, 44, {11, 12, 13, 14, 40, 41, 42, 43, 33, 34, 35, 36}}, // ZEHN NACH HALB
+/*	{1, 40, 44, {7, 8, 9, 10, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }}, // FÜNF VOR DREIVIERTEL */
+	{1, 40, 44, {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }},    // DREIVIERTEL
+	{1, 20, 24, {11, 12, 13, 14, 18, 19, 20}},                     // ZEHN VOR
+	{1, 25, 29, {7, 8, 9, 10, 18, 19, 20}}                         // FÜNF VOR
+};
+
+const std::vector<leds_template_t> hours_template =
+{
+	{0,  0, 12, {99, 100, 101, 102, 103}}, // ZWÖLF
+	{1,  1, 13, {44, 45, 46}},             // EIN
+	{2,  1, 13, {44, 45, 46, 47}},         // EINS
+	{0,  2, 14, {51, 52, 53, 54}},         // ZWEI
+	{0,  3, 15, {55, 56, 57, 58}},         // DREI
+	{0,  4, 16, {62, 63, 64, 65}},         // VIER
+	{0,  5, 17, {66, 67, 68, 69}},         // FÜNF
+	{0,  6, 18, {72, 73, 74, 75, 76}},     // SECHS
+	{0,  7, 19, {77, 78, 79, 80, 81, 82}}, // SIEBEN
+	{0,  8, 20, {84, 85, 86, 87}},         // ACHT
+	{0,  9, 21, {88, 89, 90, 91}},         // NEUN
+	{0, 10, 22, {92, 93, 94, 95}},         // ZEHN
+	{0, 11, 23, {96, 97, 98}},             // ELF
 };
 
 // color gradient from white to green to black for matrix screen saver
@@ -369,327 +412,54 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 	buf[0 * 11 + 5] = 1; // T
 
 	// minutes 1...4 for the corners
-	if ((m % 5) == 1)
+	switch(m % 5)
 	{
+	case 1:
 		buf[10 * 11 + 0] = 1;
-	}
-	else if ((m % 5) == 2)
-	{
+		break;
+	case 2:
 		buf[10 * 11 + 0] = 1;
 		buf[10 * 11 + 1] = 1;
-	}
-	else if ((m % 5) == 3)
-	{
+		break;
+	case 3:
 		buf[10 * 11 + 0] = 1;
 		buf[10 * 11 + 1] = 1;
 		buf[10 * 11 + 2] = 1;
-	}
-	else if ((m % 5) == 4)
-	{
+		break;
+	case 4:
 		buf[10 * 11 + 0] = 1;
 		buf[10 * 11 + 1] = 1;
 		buf[10 * 11 + 2] = 1;
 		buf[10 * 11 + 3] = 1;
+		break;
+	default:
+		break;
 	}
 
-	// minutes
-	if (m < 5)
+	int adjust_hour = 0;
+	for(leds_template_t t : minutes_template)
 	{
-		buf[9 * 11 + 8] = 1;  // U
-		buf[9 * 11 + 9] = 1;  // H
-		buf[9 * 11 + 10] = 1; // R
-	}
-	else if (m < 10)
-	{
-		buf[0 * 11 + 7] = 1;  // F
-		buf[0 * 11 + 8] = 1;  // Ü
-		buf[0 * 11 + 9] = 1;  // N
-		buf[0 * 11 + 10] = 1; // F
-
-		buf[3 * 11 + 7] = 1;  // N
-		buf[3 * 11 + 8] = 1;  // A
-		buf[3 * 11 + 9] = 1;  // C
-		buf[3 * 11 + 10] = 1; // H
-	}
-	else if (m < 15)
-	{
-		buf[1 * 11 + 0] = 1;  // Z
-		buf[1 * 11 + 1] = 1;  // E
-		buf[1 * 11 + 2] = 1;  // H
-		buf[1 * 11 + 3] = 1;  // N
-
-		buf[3 * 11 + 7] = 1;  // N
-		buf[3 * 11 + 8] = 1;  // A
-		buf[3 * 11 + 9] = 1;  // C
-		buf[3 * 11 + 10] = 1; // H
-	}
-	else if (m < 20)
-	{
-		buf[2 * 11 + 4] = 1;  // V
-		buf[2 * 11 + 5] = 1;  // I
-		buf[2 * 11 + 6] = 1;  // E
-		buf[2 * 11 + 7] = 1;  // R
-		buf[2 * 11 + 8] = 1;  // T
-		buf[2 * 11 + 9] = 1;  // E
-		buf[2 * 11 + 10] = 1; // L
-		h++;
-	}
-	else if (m < 25)
-	{
-		buf[1 * 11 + 0] = 1;  // Z
-		buf[1 * 11 + 1] = 1;  // E
-		buf[1 * 11 + 2] = 1;  // H
-		buf[1 * 11 + 3] = 1;  // N
-
-		buf[1 * 11 + 7] = 1;  // V
-		buf[1 * 11 + 8] = 1;  // O
-		buf[1 * 11 + 9] = 1;  // R
-
-		buf[3 * 11 + 0] = 1;  // H
-		buf[3 * 11 + 1] = 1;  // A
-		buf[3 * 11 + 2] = 1;  // L
-		buf[3 * 11 + 3] = 1;  // B
-		h++;
-	}
-	else if (m < 30)
-	{
-		buf[0 * 11 + 7] = 1;  // F
-		buf[0 * 11 + 8] = 1;  // Ü
-		buf[0 * 11 + 9] = 1;  // N
-		buf[0 * 11 + 10] = 1; // F
-
-		buf[1 * 11 + 7] = 1;  // V
-		buf[1 * 11 + 8] = 1;  // O
-		buf[1 * 11 + 9] = 1;  // R
-
-		buf[3 * 11 + 0] = 1;  // H
-		buf[3 * 11 + 1] = 1;  // A
-		buf[3 * 11 + 2] = 1;  // L
-		buf[3 * 11 + 3] = 1;  // B
-		h++;
-	}
-	else if (m < 35)
-	{
-		buf[3 * 11 + 0] = 1;  // H
-		buf[3 * 11 + 1] = 1;  // A
-		buf[3 * 11 + 2] = 1;  // L
-		buf[3 * 11 + 3] = 1;  // B
-		h++;
-	}
-	else if (m < 40)
-	{
-#ifdef USE_BUGFIX
-		buf[1 * 11 + 0] = 1;  // Z
-		buf[1 * 11 + 1] = 1;// E
-		buf[1 * 11 + 2] = 1;// H
-		buf[1 * 11 + 3] = 1;// N
-
-		buf[1 * 11 + 7] = 1;// V
-		buf[1 * 11 + 8] = 1;// O
-		buf[1 * 11 + 9] = 1;// R
-
-		buf[2 * 11 + 0] = 1;// D
-		buf[2 * 11 + 1] = 1;// R
-		buf[2 * 11 + 2] = 1;// E
-		buf[2 * 11 + 3] = 1;// I
-		buf[2 * 11 + 4] = 1;// V
-		buf[2 * 11 + 5] = 1;// I
-		buf[2 * 11 + 6] = 1;// E
-		buf[2 * 11 + 7] = 1;// R
-		buf[2 * 11 + 8] = 1;// T
-		buf[2 * 11 + 9] = 1;// E
-		buf[2 * 11 + 10] = 1;// L
-#else
-		buf[0 * 11 + 7] = 1;  // F
-		buf[0 * 11 + 8] = 1;  // Ü
-		buf[0 * 11 + 9] = 1;  // N
-		buf[0 * 11 + 10] = 1; // F
-
-		buf[3 * 11 + 7] = 1;  // N
-		buf[3 * 11 + 8] = 1;  // A
-		buf[3 * 11 + 9] = 1;  // C
-		buf[3 * 11 + 10] = 1; // H
-
-		buf[3 * 11 + 0] = 1;  // H
-		buf[3 * 11 + 1] = 1;  // A
-		buf[3 * 11 + 2] = 1;  // L
-		buf[3 * 11 + 3] = 1;  // B
-#endif
-		h++;
-	}
-	else if (m < 45)
-	{
-#ifdef USE_BUGFIX
-		buf[0 * 11 + 7] = 1;  // F
-		buf[0 * 11 + 8] = 1;// Ü
-		buf[0 * 11 + 9] = 1;// N
-		buf[0 * 11 + 10] = 1;// F
-
-		buf[1 * 11 + 7] = 1;// V
-		buf[1 * 11 + 8] = 1;// O
-		buf[1 * 11 + 9] = 1;// R
-
-		buf[2 * 11 + 0] = 1;// D
-		buf[2 * 11 + 1] = 1;// R
-		buf[2 * 11 + 2] = 1;// E
-		buf[2 * 11 + 3] = 1;// I
-		buf[2 * 11 + 4] = 1;// V
-		buf[2 * 11 + 5] = 1;// I
-		buf[2 * 11 + 6] = 1;// E
-		buf[2 * 11 + 7] = 1;// R
-		buf[2 * 11 + 8] = 1;// T
-		buf[2 * 11 + 9] = 1;// E
-		buf[2 * 11 + 10] = 1;// L
-#else
-		buf[1 * 11 + 0] = 1;  // Z
-		buf[1 * 11 + 1] = 1;  // E
-		buf[1 * 11 + 2] = 1;  // H
-		buf[1 * 11 + 3] = 1;  // N
-
-		buf[3 * 11 + 7] = 1;  // N
-		buf[3 * 11 + 8] = 1;  // A
-		buf[3 * 11 + 9] = 1;  // C
-		buf[3 * 11 + 10] = 1; // H
-
-		buf[3 * 11 + 0] = 1;  // H
-		buf[3 * 11 + 1] = 1;  // A
-		buf[3 * 11 + 2] = 1;  // L
-		buf[3 * 11 + 3] = 1;  // B
-#endif
-		h++;
-	}
-	else if (m < 50)
-	{
-		buf[2 * 11 + 0] = 1;  // D
-		buf[2 * 11 + 1] = 1;  // R
-		buf[2 * 11 + 2] = 1;  // E
-		buf[2 * 11 + 3] = 1;  // I
-		buf[2 * 11 + 4] = 1;  // V
-		buf[2 * 11 + 5] = 1;  // I
-		buf[2 * 11 + 6] = 1;  // E
-		buf[2 * 11 + 7] = 1;  // R
-		buf[2 * 11 + 8] = 1;  // T
-		buf[2 * 11 + 9] = 1;  // E
-		buf[2 * 11 + 10] = 1; // L
-		h++;
-	}
-	else if (m < 55)
-	{
-		buf[1 * 11 + 0] = 1;  // Z
-		buf[1 * 11 + 1] = 1;  // E
-		buf[1 * 11 + 2] = 1;  // H
-		buf[1 * 11 + 3] = 1;  // N
-
-		buf[1 * 11 + 7] = 1;  // V
-		buf[1 * 11 + 8] = 1;  // O
-		buf[1 * 11 + 9] = 1;  // R
-		h++;
-	}
-	else
-	{
-		buf[0 * 11 + 7] = 1;  // F
-		buf[0 * 11 + 8] = 1;  // Ü
-		buf[0 * 11 + 9] = 1;  // N
-		buf[0 * 11 + 10] = 1; // F
-
-		buf[1 * 11 + 7] = 1;  // V
-		buf[1 * 11 + 8] = 1;  // O
-		buf[1 * 11 + 9] = 1;  // R
-		h++;
+		if(m >= t.param1 && m <= t.param2)
+		{
+			for(int i: t.LEDs) buf[i] = 1;
+			adjust_hour = t.param0;
+			break;
+		}
 	}
 
-	// check for hours overflow
-	if (h > 23)
-		h = 0;
+	h += adjust_hour;
+	if (h > 23)	h -= 24;
 
-	// hours
-	if (h == 0 || h == 12)
+	for(leds_template_t t : hours_template)
 	{
-		buf[9 * 11 + 0] = 1;  // Z
-		buf[9 * 11 + 1] = 1;  // W
-		buf[9 * 11 + 2] = 1;  // Ö
-		buf[9 * 11 + 3] = 1;  // L
-		buf[9 * 11 + 4] = 1;  // F
-	}
-	else if (h == 1 || h == 13)
-	{
-		buf[4 * 11 + 0] = 1;  // E
-		buf[4 * 11 + 1] = 1;  // I
-		buf[4 * 11 + 2] = 1;  // N
-		if (m > 4)
-			buf[4 * 11 + 3] = 1; // S
-	}
-	else if (h == 2 || h == 14)
-	{
-		buf[4 * 11 + 7] = 1;  // Z
-		buf[4 * 11 + 8] = 1;  // W
-		buf[4 * 11 + 9] = 1;  // E
-		buf[4 * 11 + 10] = 1; // I
-	}
-	else if (h == 3 || h == 15)
-	{
-		buf[5 * 11 + 0] = 1;  // D
-		buf[5 * 11 + 1] = 1;  // R
-		buf[5 * 11 + 2] = 1;  // E
-		buf[5 * 11 + 3] = 1;  // I
-	}
-	else if (h == 4 || h == 16)
-	{
-		buf[5 * 11 + 7] = 1;  // V
-		buf[5 * 11 + 8] = 1;  // I
-		buf[5 * 11 + 9] = 1;  // E
-		buf[5 * 11 + 10] = 1; // R
-	}
-	else if (h == 5 || h == 17)
-	{
-		buf[6 * 11 + 0] = 1;  // F
-		buf[6 * 11 + 1] = 1;  // Ü
-		buf[6 * 11 + 2] = 1;  // N
-		buf[6 * 11 + 3] = 1;  // F
-	}
-	else if (h == 6 || h == 18)
-	{
-		buf[6 * 11 + 6] = 1;  // S
-		buf[6 * 11 + 7] = 1;  // E
-		buf[6 * 11 + 8] = 1;  // C
-		buf[6 * 11 + 9] = 1;  // H
-		buf[6 * 11 + 10] = 1; // S
-	}
-	else if (h == 7 || h == 19)
-	{
-		buf[7 * 11 + 0] = 1;  // S
-		buf[7 * 11 + 1] = 1;  // I
-		buf[7 * 11 + 2] = 1;  // E
-		buf[7 * 11 + 3] = 1;  // B
-		buf[7 * 11 + 4] = 1;  // E
-		buf[7 * 11 + 5] = 1;  // N
-	}
-	else if (h == 8 || h == 20)
-	{
-		buf[7 * 11 + 7] = 1;  // A
-		buf[7 * 11 + 8] = 1;  // C
-		buf[7 * 11 + 9] = 1;  // H
-		buf[7 * 11 + 10] = 1; // T
-	}
-	else if (h == 9 || h == 21)
-	{
-		buf[8 * 11 + 0] = 1;  // N
-		buf[8 * 11 + 1] = 1;  // E
-		buf[8 * 11 + 2] = 1;  // U
-		buf[8 * 11 + 3] = 1;  // N
-	}
-	else if (h == 10 || h == 22)
-	{
-		buf[8 * 11 + 4] = 1;  // Z
-		buf[8 * 11 + 5] = 1;  // E
-		buf[8 * 11 + 6] = 1;  // H
-		buf[8 * 11 + 7] = 1;  // N
-	}
-	else if (h == 11 || h == 23)
-	{
-		buf[8 * 11 + 8] = 1;  // E
-		buf[8 * 11 + 9] = 1;  // L
-		buf[8 * 11 + 10] = 1; // F
+		if((t.param1 == h || t.param2 == h) &&
+		   ((t.param0 == 1 && m < 5) ||  // special case full hour
+			(t.param0 == 2 && m >= 5) || // special case hour + minutes
+			(t.param0 == 0)))            // normal case
+		{
+			for(int i: t.LEDs) buf[i] = 1;
+			break;
+		}
 	}
 
 	// set the new values as target for fade operation
