@@ -236,17 +236,11 @@ void LEDFunctionsClass::hourglass(uint8_t animationStep, bool green)
 	// colors in palette: black, white, yellow
 	palette_entry p[] = {{0, 0, 0}, {255, 255, 255}, {255, 255, 0}, {255, 255, 0}};
 
+	// delete red component in palette entry 3 to make this color green
 	if(green) p[3].r = 0;
 
-	// safety check
-	if (animationStep < HOURGLASS_ANIMATION_FRAMES)
-	{
-		this->set(hourglass_animation[animationStep], p, true);
-	}
-	else
-	{
-		this->set(hourglass_animation[0], p, true);
-	}
+	if (animationStep >= HOURGLASS_ANIMATION_FRAMES) animationStep = 0;
+	this->set(hourglass_animation[animationStep], p, true);
 }
 
 //---------------------------------------------------------------------------------------
@@ -294,8 +288,6 @@ void LEDFunctionsClass::setBrightness(uint8_t brightness)
 	this->brightness = brightness;
 }
 
-//#define USE_BUGFIX
-
 //---------------------------------------------------------------------------------------
 // displayTime
 //
@@ -315,17 +307,8 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 	// initialize the buffer with either background (=0) or seconds progress (=2)
 	// part of the background will be illuminated with color 2 depending on current
 	// seconds/milliseconds value, whole screen is backlit when seconds = 59
-	int pos = s * 1000 + ms;
-	pos *= 110;
-	pos /= 60000;
-	pos++;
-	for (int i = 0; i < NUM_PIXELS; i++)
-	{
-		if (i < pos)
-			buf[i] = 2;
-		else
-			buf[i] = 0;
-	}
+	int pos = (((s * 1000 + ms) * 110) / 60000) + 1;
+	for (int i = 0; i < NUM_PIXELS; i++) buf[i] = (i < pos) ? 2 : 0;
 
 	// set static LEDs
 	buf[0 * 11 + 0] = 1; // E
@@ -338,28 +321,35 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 	// minutes 1...4 for the corners
 	for(int i=0; i<=((m%5)-1); i++) buf[10 * 11 + i] = 1;
 
+	// iterate over minutes_template
 	int adjust_hour = 0;
 	for(leds_template_t t : minutes_template)
 	{
+		// test if this template matches the current minute
 		if(m >= t.param1 && m <= t.param2)
 		{
-			for(int i: t.LEDs) buf[i] = 1;
+			// set all LEDs defined in this template
+			for(int i : t.LEDs) buf[i] = 1;
 			adjust_hour = t.param0;
 			break;
 		}
 	}
 
+	// adjust hour display if necessary (e. g. 09:45 = quarter to *TEN* instead of NINE)
 	h += adjust_hour;
 	if (h > 23)	h -= 24;
 
+	// iterate over hours template
 	for(leds_template_t t : hours_template)
 	{
+		// test if this template matches the current hour
 		if((t.param1 == h || t.param2 == h) &&
 		   ((t.param0 == 1 && m < 5) ||  // special case full hour
 			(t.param0 == 2 && m >= 5) || // special case hour + minutes
 			(t.param0 == 0)))            // normal case
 		{
-			for(int i: t.LEDs) buf[i] = 1;
+			// set all LEDs defined in this template
+			for(int i : t.LEDs) buf[i] = 1;
 			break;
 		}
 	}
@@ -440,8 +430,7 @@ void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source,
 	for (int i = 0; i < NUM_PIXELS; i++)
 	{
 		// get next 4 bytes
-		if (byteCounter == 0)
-			currentDWord = buf[i >> 2];
+		if (byteCounter == 0) currentDWord = buf[i >> 2];
 
 		mapping = led_mapping[i] * 3;
 		palette_index = currentBytes[byteCounter];
@@ -449,8 +438,7 @@ void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source,
 		target[mapping + 1] = palette[palette_index].g;
 		target[mapping + 2] = palette[palette_index].b;
 
-		if (++byteCounter > 3)
-			byteCounter = 0;
+		byteCounter = (byteCounter + 1) & 0x03;
 	}
 }
 
