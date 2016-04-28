@@ -17,15 +17,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Adafruit_NeoPixel.h>
 #include <stdint.h>
+#include <vector>
 
 #include "config.h"
 
 #ifndef _LEDFUNCTIONS_H_
 #define _LEDFUNCTIONS_H_
 
-#define NUM_PIXELS 114
+typedef struct _leds_template_t
+{
+	int param0, param1, param2;
+	const std::vector<int> LEDs;
+} leds_template_t;
 
-#define HOURGLASS_ANIMATION_FRAMES 8
 #define MATRIX_SPEED 3500
 #define NUM_MATRIX_OBJECTS 25
 typedef struct _matrix_object
@@ -58,7 +62,7 @@ public:
 	void showStars(bool show);
 	void showMatrix(bool show);
 	void setBrightness(uint8_t brightness);
-	void hourglass(uint8_t animationStep);
+	void hourglass(uint8_t animationStep, bool green);
 
 private:
 	matrix_object matrix_objects[NUM_MATRIX_OBJECTS];
@@ -79,8 +83,7 @@ private:
 	void heart();
 	void stars();
 	void fade();
-	void setBuffer(uint8_t *target, const uint8_t *source,
-			palette_entry palette[]);
+	void setBuffer(uint8_t *target, const uint8_t *source, palette_entry palette[]);
 };
 
 extern LEDFunctionsClass LED;

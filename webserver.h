@@ -36,6 +36,7 @@ public:
 	bool showHeart = false;
 	bool showStars = false;
 	bool showHourglass = false;
+	bool showGreenHourglass = false;
 
 private:
 	ESP8266WebServer *server = NULL;

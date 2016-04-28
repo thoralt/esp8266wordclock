@@ -106,7 +106,7 @@ void timerCallback()
 		hourglassPrescaler += TIMER_RESOLUTION;
 		if (hourglassPrescaler >= HOURGLASS_ANIMATION_PERIOD)
 		{
-			LED.hourglass(hourglassState);
+			LED.hourglass(hourglassState, WebServer.showGreenHourglass);
 			hourglassPrescaler -= HOURGLASS_ANIMATION_PERIOD;
 			if (++hourglassState >= HOURGLASS_ANIMATION_FRAMES)
 				hourglassState = 0;
@@ -125,7 +125,6 @@ void timerCallback()
 void configModeCallback(WiFiManager *myWiFiManager) 
 {
 	WebServer.showHourglass = false;
-
 	const uint8_t wifimanager[] = {
 		0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 		0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
@@ -326,8 +325,6 @@ void setup()
 
 	// telnetServer.begin();
 	// telnetServer.setNoDelay(true);
-
-	WebServer.showHourglass = false;
 }
 
 //-----------------------------------------------------------------------------------
@@ -344,27 +341,15 @@ void loop()
 
 	if(updateCountdown)
 	{
-		const uint8_t wifimanager[] = {
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			1, 1, 1, 1
-		};
-		palette_entry p[] = {{0, 0, 0}, {0, 255, 0}};
-		LED.set(wifimanager, p, true);
-
+		WebServer.showGreenHourglass = true;
 		Serial.print(".");
 		delay(100);
 		updateCountdown--;
 		return;
 	}
+
+	WebServer.showGreenHourglass = false;
+	WebServer.showHourglass = false;
 
 	// do web server stuff
 	WebServer.process();

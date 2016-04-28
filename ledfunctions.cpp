@@ -19,7 +19,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ledfunctions.h"
-#include <vector>
 
 //---------------------------------------------------------------------------------------
 // global instance
@@ -29,9 +28,11 @@ LEDFunctionsClass LED = LEDFunctionsClass();
 //---------------------------------------------------------------------------------------
 // variables in PROGMEM (mapping table, images)
 //---------------------------------------------------------------------------------------
+#include "hourglass_animation.inc"
 
 // this mapping table maps the linear memory buffer structure used throughout the
 // project to the physical layout of the LEDs
+#if 1 // to allow code folding
 static const uint32_t PROGMEM led_mapping[NUM_PIXELS] =
 {
 	10,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0,
@@ -46,13 +47,13 @@ static const uint32_t PROGMEM led_mapping[NUM_PIXELS] =
 	99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
 	112, 111, 110, 113
 };
+#endif
 
-typedef struct _leds_template_t
-{
-	int param0, param1, param2;
-	const std::vector<int> LEDs;
-} leds_template_t;
-
+// This defines the LED output for different minutes
+// param0 controls whether the hour has to be incremented for the given minutes
+// param1 is the matching minimum minute count (inclusive)
+// param2 is the matching maximum minute count (inclusive)
+#if 1 // to allow code folding
 const std::vector<leds_template_t> minutes_template =
 {
 	{0,  0,  4, {107, 108, 109}},                                  // UHR
@@ -67,11 +68,20 @@ const std::vector<leds_template_t> minutes_template =
 /*	{1, 35, 39, {11, 12, 13, 14, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }}, // ZEHN VOR DREIVIERTEL */
 	{1, 40, 44, {11, 12, 13, 14, 40, 41, 42, 43, 33, 34, 35, 36}}, // ZEHN NACH HALB
 /*	{1, 40, 44, {7, 8, 9, 10, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }}, // FÜNF VOR DREIVIERTEL */
-	{1, 40, 44, {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }},    // DREIVIERTEL
-	{1, 20, 24, {11, 12, 13, 14, 18, 19, 20}},                     // ZEHN VOR
-	{1, 25, 29, {7, 8, 9, 10, 18, 19, 20}}                         // FÜNF VOR
+	{1, 45, 49, {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 }},    // DREIVIERTEL
+	{1, 50, 54, {11, 12, 13, 14, 18, 19, 20}},                     // ZEHN VOR
+	{1, 55, 59, {7, 8, 9, 10, 18, 19, 20}}                         // FÜNF VOR
 };
+#endif
 
+// This defines the LED output for different hours
+// param0 deals with special cases:
+//     = 0: matches hour in param1 and param2
+//     = 1: matches hour in param1 and param2 whenever minute is < 5
+//     = 2: matches hour in param1 and param2 whenever minute is >= 5
+// param1: hour to match
+// param2: alternative hour to match
+#if 1 // to allow code folding
 const std::vector<leds_template_t> hours_template =
 {
 	{0,  0, 12, {99, 100, 101, 102, 103}}, // ZWÖLF
@@ -88,9 +98,11 @@ const std::vector<leds_template_t> hours_template =
 	{0, 10, 22, {92, 93, 94, 95}},         // ZEHN
 	{0, 11, 23, {96, 97, 98}},             // ELF
 };
+#endif
 
 // color gradient from white to green to black for matrix screen saver
 #define MATRIX_GRADIENT_LENGTH 12
+#if 1 // to allow code folding
 static const palette_entry matrix_gradient[MATRIX_GRADIENT_LENGTH] = {
 	{255, 255, 255},
 	{128, 255, 128},
@@ -105,100 +117,7 @@ static const palette_entry matrix_gradient[MATRIX_GRADIENT_LENGTH] = {
 	{  0,   1,   0},
 	{  0,   0,   0}
 };
-
-// animation frames for hourglass animation
-// second dimension is NUM_PIXELS+2 to guarantee each frame starts at
-// a 32 bit boundary
-static const uint8_t PROGMEM hourglass_animation[HOURGLASS_ANIMATION_FRAMES][NUM_PIXELS+2] = {
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 2, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0},
-	{   0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 0, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 2, 2, 2, 0, 1, 0, 0,
-		0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-		2, 2, 2, 2, 0, 0}
-};
+#endif
 
 //---------------------------------------------------------------------------------------
 // randomizeStar
@@ -307,12 +226,17 @@ void LEDFunctionsClass::begin(int pin)
 // ATTENTION: Animation frames must start at 32 bit boundary each!
 //
 // -> animationStep: Number of current frame [0...HOURGLASS_ANIMATION_FRAMES]
+//    green: Flag to switch the palette color 3 to green instead of yellow (used in the
+//           second half of the hourglass animation to indicate the short wait-for-OTA
+//           window)
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::hourglass(uint8_t animationStep)
+void LEDFunctionsClass::hourglass(uint8_t animationStep, bool green)
 {
 	// colors in palette: black, white, yellow
-	palette_entry p[] = {{0, 0, 0}, {255, 255, 255}, {255, 255, 0}};
+	palette_entry p[] = {{0, 0, 0}, {255, 255, 255}, {255, 255, 0}, {255, 255, 0}};
+
+	if(green) p[3].r = 0;
 
 	// safety check
 	if (animationStep < HOURGLASS_ANIMATION_FRAMES)
@@ -412,29 +336,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 	buf[0 * 11 + 5] = 1; // T
 
 	// minutes 1...4 for the corners
-	switch(m % 5)
-	{
-	case 1:
-		buf[10 * 11 + 0] = 1;
-		break;
-	case 2:
-		buf[10 * 11 + 0] = 1;
-		buf[10 * 11 + 1] = 1;
-		break;
-	case 3:
-		buf[10 * 11 + 0] = 1;
-		buf[10 * 11 + 1] = 1;
-		buf[10 * 11 + 2] = 1;
-		break;
-	case 4:
-		buf[10 * 11 + 0] = 1;
-		buf[10 * 11 + 1] = 1;
-		buf[10 * 11 + 2] = 1;
-		buf[10 * 11 + 3] = 1;
-		break;
-	default:
-		break;
-	}
+	for(int i=0; i<=((m%5)-1); i++) buf[10 * 11 + i] = 1;
 
 	int adjust_hour = 0;
 	for(leds_template_t t : minutes_template)

@@ -20,6 +20,9 @@
 
 #include <IPAddress.h>
 
+#define NUM_PIXELS 114
+#define HOURGLASS_ANIMATION_FRAMES 8
+
 // structure to encapsulate a color value with red, green and blue values
 typedef struct _palette_entry
 {
