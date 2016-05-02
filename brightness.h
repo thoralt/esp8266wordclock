@@ -15,10 +15,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#include <stdint.h>
-
 #ifndef _BRIGHTNESS_H_
 #define _BRIGHTNESS_H_
+
+#include <stdint.h>
 
 #define ALPHA(x) ((uint16_t)(x * 65535.0f))
 #define FILTER_COEFFICIENT ALPHA(0.01)

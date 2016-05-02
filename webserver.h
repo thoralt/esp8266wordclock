@@ -54,6 +54,8 @@ private:
 	void handleHeartbeat();
 	void handleStars();
 	void handleInfo();
+	void handleH();
+	void handleM();
 	void handleGetNtpServer();
 	void handleSetNtpServer();
 	void extractColor(String argName, palette_entry& result);

@@ -30,31 +30,12 @@ LEDFunctionsClass LED = LEDFunctionsClass();
 //---------------------------------------------------------------------------------------
 #include "hourglass_animation.inc"
 
-// this mapping table maps the linear memory buffer structure used throughout the
-// project to the physical layout of the LEDs
-#if 1 // to allow code folding
-static const uint32_t PROGMEM led_mapping[NUM_PIXELS] =
-{
-	10,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0,
-	11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,
-	32,  31,  30,  29,  28,  27,  26,  25,  24,  23,  22,
-	33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,
-	54,  53,  52,  51,  50,  49,  48,  47,  46,  45,  44,
-	55,  56,  57,  58,  59,  60,  61,  62,  63,  64,  65,
-	76,  75,  74,  73,  72,  71,  70,  69,  68,  67,  66,
-	77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,
-	98,  97,  96,  95,  94,  93,  92,  91,  90,  89,  88,
-	99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
-	112, 111, 110, 113
-};
-#endif
-
 // This defines the LED output for different minutes
 // param0 controls whether the hour has to be incremented for the given minutes
 // param1 is the matching minimum minute count (inclusive)
 // param2 is the matching maximum minute count (inclusive)
 #if 1 // to allow code folding
-const std::vector<leds_template_t> minutes_template =
+const std::vector<leds_template_t> LEDFunctionsClass::minutesTemplate =
 {
 	{0,  0,  4, {107, 108, 109}},                                  // UHR
 	{0,  5,  9, {7, 8, 9, 10, 40, 41, 42, 43}},                    // FÜNF NACH
@@ -82,7 +63,7 @@ const std::vector<leds_template_t> minutes_template =
 // param1: hour to match
 // param2: alternative hour to match
 #if 1 // to allow code folding
-const std::vector<leds_template_t> hours_template =
+const std::vector<leds_template_t> LEDFunctionsClass::hoursTemplate =
 {
 	{0,  0, 12, {99, 100, 101, 102, 103}}, // ZWÖLF
 	{1,  1, 13, {44, 45, 46}},             // EIN
@@ -100,72 +81,33 @@ const std::vector<leds_template_t> hours_template =
 };
 #endif
 
-// color gradient from white to green to black for matrix screen saver
-#define MATRIX_GRADIENT_LENGTH 12
-#if 1 // to allow code folding
-static const palette_entry matrix_gradient[MATRIX_GRADIENT_LENGTH] = {
-	{255, 255, 255},
-	{128, 255, 128},
-	{ 64, 255,  64},
-	{  0, 255,   0},
-	{  0, 128,   0},
-	{  0,  64,   0},
-	{  0,  32,   0},
-	{  0,  16,   0},
-	{  0,   8,   0},
-	{  0,   2,   0},
-	{  0,   1,   0},
-	{  0,   0,   0}
+// this mapping table maps the linear memory buffer structure used throughout the
+// project to the physical layout of the LEDs
+const uint32_t PROGMEM LEDFunctionsClass::mapping[NUM_PIXELS] = {
+	10,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0,
+	11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,
+	32,  31,  30,  29,  28,  27,  26,  25,  24,  23,  22,
+	33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,
+	54,  53,  52,  51,  50,  49,  48,  47,  46,  45,  44,
+	55,  56,  57,  58,  59,  60,  61,  62,  63,  64,  65,
+	76,  75,  74,  73,  72,  71,  70,  69,  68,  67,  66,
+	77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,
+	98,  97,  96,  95,  94,  93,  92,  91,  90,  89,  88,
+	99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+	112, 111, 110, 113
 };
-#endif
 
 //---------------------------------------------------------------------------------------
-// randomizeStar
+// ~LEDFunctionsClass
 //
-// Assigns new random coordinates and speed to a star structure. Retries until new
-// coordinates have a distance of minimum 2 LEDs.
+// Destructor
 //
-// -> index: Number of star to be randomized [0...NUM_STARS-1]
+// -> --
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::randomizeStar(int index)
+LEDFunctionsClass::~LEDFunctionsClass()
 {
-	int retryCount = 0;
-	bool distanceOK;
-	int x = 0, y = 0, dx, dy;
-
-	do
-	{
-		// assume distance is OK
-		distanceOK = true;
-
-		// create new random pair
-		x = random(11);
-		y = random(10);
-		retryCount++;
-
-		// iterate over all other stars
-		for (int j = 0; j < NUM_STARS; j++)
-		{
-			// skip the star which is currently being randomized
-			if (j == index)
-				continue;
-
-			// calculate distance
-			dx = x - star_objects[j].x;
-			dy = y - star_objects[j].y;
-			if (dx * dx + dy * dy < 5)
-			{
-				// retry if distance to any star is below limit
-				distanceOK = false;
-				break;
-			}
-		}
-	} while (!distanceOK && retryCount < 100);
-
-	this->star_objects[index].x = x;
-	this->star_objects[index].y = y;
-	this->star_objects[index].speed = 15 + random(15);
+//	for(MatrixObject* m : this->matrix_objects) delete m;
 }
 
 //---------------------------------------------------------------------------------------
@@ -181,28 +123,14 @@ LEDFunctionsClass::LEDFunctionsClass()
 	// initialize matrix objects with random coordinates
 	for (int i = 0; i < NUM_MATRIX_OBJECTS; i++)
 	{
-		this->matrix_objects[i].x = random(11);
-		this->matrix_objects[i].y = random(25) - 25;
-		this->matrix_objects[i].speed = MATRIX_SPEED;
-		this->matrix_objects[i].count = 0;
+		this->matrix.push_back(MatrixObject());
 	}
 
-	// initialize star objects with coordinates [-10, -10] to prepare for
-	// calls to randomizeStar()
-	for (int i = 0; i < NUM_STARS; i++)
-	{
-		this->star_objects[i].x = -10;
-		this->star_objects[i].y = -10;
-	}
+	// initialize star objects with default coordinates
+	for (int i = 0; i < NUM_STARS; i++) this->stars.push_back(StarObject());
 
-	// initialize stars with random coordinates
-	for (int i = 0; i < NUM_STARS; i++)
-	{
-		this->randomizeStar(i);
-		this->star_objects[i].count = 0;
-		this->star_objects[i].state = 0;
-		this->star_objects[i].brightness = random(250);
-	}
+	// set random coordinates with minimum distance to other star objects
+	for (StarObject& s : this->stars) s.randomize(this->stars);
 }
 
 //---------------------------------------------------------------------------------------
@@ -256,15 +184,15 @@ void LEDFunctionsClass::process()
 	// check for flags to display matrix, heart or stars
 	if (this->doMatrix)
 	{
-		this->matrix();
+		this->renderMatrix();
 	}
 	else if (this->doHeart)
 	{
-		this->heart();
+		this->renderHeart();
 	}
 	else if (this->doStars)
 	{
-		this->stars();
+		this->renderStars();
 	}
 	else
 	{
@@ -323,7 +251,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 
 	// iterate over minutes_template
 	int adjust_hour = 0;
-	for(leds_template_t t : minutes_template)
+	for(leds_template_t t : LEDFunctionsClass::minutesTemplate)
 	{
 		// test if this template matches the current minute
 		if(m >= t.param1 && m <= t.param2)
@@ -340,7 +268,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 	if (h > 23)	h -= 24;
 
 	// iterate over hours template
-	for(leds_template_t t : hours_template)
+	for(leds_template_t t : LEDFunctionsClass::hoursTemplate)
 	{
 		// test if this template matches the current hour
 		if((t.param1 == h || t.param2 == h) &&
@@ -432,7 +360,7 @@ void LEDFunctionsClass::setBuffer(uint8_t *target, const uint8_t *source,
 		// get next 4 bytes
 		if (byteCounter == 0) currentDWord = buf[i >> 2];
 
-		mapping = led_mapping[i] * 3;
+		mapping = LEDFunctionsClass::mapping[i] * 3;
 		palette_index = currentBytes[byteCounter];
 		target[mapping + 0] = palette[palette_index].r;
 		target[mapping + 1] = palette[palette_index].g;
@@ -543,67 +471,16 @@ void LEDFunctionsClass::showMatrix(bool show)
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::matrix()
+void LEDFunctionsClass::renderMatrix()
 {
-	uint8_t *buf = this->currentValues;
+	// clear buffer
+	memset(this->currentValues, 0, sizeof(this->currentValues));
 
 	// sort by y coordinate for correct overlapping
-	matrix_object temp;
-	for (int i = 0; i < NUM_MATRIX_OBJECTS; i++)
-	{
-		for (int j = i + 1; j < NUM_MATRIX_OBJECTS; j++)
-		{
-			if (matrix_objects[i].y < matrix_objects[j].y)
-			{
-				temp = matrix_objects[i];
-				matrix_objects[i] = matrix_objects[j];
-				matrix_objects[j] = temp;
-			}
-		}
-	}
+	std::sort(matrix.begin(), matrix.end());
 
-	// clear buffer
-	for (int i = 0; i < NUM_PIXELS * 3; i++)
-		buf[i] = 0;
-
-	// iterate over all matrix objects
-	for (int i = 0; i < NUM_MATRIX_OBJECTS; i++)
-	{
-		// check if current matrix object has left the screen
-		if (matrix_objects[i].y - MATRIX_GRADIENT_LENGTH > 10)
-		{
-			// recreate object with new x, y and speed
-			matrix_objects[i].x = random(11);
-			matrix_objects[i].y = random(25) - 25;
-			matrix_objects[i].speed = MATRIX_SPEED;
-			matrix_objects[i].count = 0;
-		}
-		else
-		{
-			// update position
-			matrix_objects[i].count += matrix_objects[i].speed;
-			if (matrix_objects[i].count > 30000)
-			{
-				matrix_objects[i].count -= 30000;
-				matrix_objects[i].y++;
-			}
-		}
-
-		// draw the gradient of one matrix object
-		int y = matrix_objects[i].y;
-		int x = matrix_objects[i].x;
-		for (int j = 0; j < MATRIX_GRADIENT_LENGTH; j++)
-		{
-			int ofs = led_mapping[x + y * 11] * 3;
-			if (y >= 0 && y < 10)
-			{
-				buf[ofs + 0] = matrix_gradient[j].r;
-				buf[ofs + 1] = matrix_gradient[j].g;
-				buf[ofs + 2] = matrix_gradient[j].b;
-			}
-			y--;
-		}
-	}
+	// iterate over all matrix objects, move and render them
+	for (MatrixObject &m : this->matrix) m.render(this->currentValues);
 	this->show();
 }
 
@@ -615,55 +492,12 @@ void LEDFunctionsClass::matrix()
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::stars()
+void LEDFunctionsClass::renderStars()
 {
-	uint8_t *buf = this->currentValues;
-
 	// clear buffer
-	for (int i = 0; i < NUM_PIXELS * 3; i++)
-		buf[i] = 0;
+	memset(this->currentValues, 0, sizeof(this->currentValues));
 
-	int x, y, b, offset;
-	for (int i = 0; i < NUM_STARS; i++)
-	{
-		// fetch coordinates and brightness of current star
-		x = this->star_objects[i].x;
-		y = this->star_objects[i].y;
-		b = this->star_objects[i].brightness;
-		if(b < 0) b = 0;
-		if(b > 255) b = 255;
-
-		// write brightness to target buffer
-		offset = led_mapping[x + y * 11] * 3;
-		buf[offset + 0] = b;
-		buf[offset + 1] = b;
-		buf[offset + 2] = b;
-
-		// increase or decrease brightness depending on current state
-		if (this->star_objects[i].state == 0)
-		{
-			this->star_objects[i].brightness += this->star_objects[i].speed;
-			if (this->star_objects[i].brightness >= 255)
-			{
-				// switch to decreasing mode
-				this->star_objects[i].brightness = 255;
-				this->star_objects[i].state = 1;
-			}
-		}
-		else
-		{
-			this->star_objects[i].brightness -= this->star_objects[i].speed;
-			if (this->star_objects[i].brightness < -2000)
-			{
-				// switch to increasing mode and get new random coordinates
-				this->star_objects[i].brightness = 0;
-				this->star_objects[i].state = 0;
-				this->randomizeStar(i);
-			}
-		}
-	}
-
-	// send current values to LEDs
+	for(StarObject &s : this->stars) s.render(this->currentValues, this->stars);
 	this->show();
 }
 
@@ -675,7 +509,7 @@ void LEDFunctionsClass::stars()
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::heart()
+void LEDFunctionsClass::renderHeart()
 {
 	palette_entry palette[2];
 	uint8_t heart[] = {

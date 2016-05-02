@@ -81,6 +81,8 @@ void WebServerClass::begin()
 	this->server->on("/getcolors", std::bind(&WebServerClass::handleGetColors, this));
 	this->server->on("/getntpserver", std::bind(&WebServerClass::handleGetNtpServer, this));
 	this->server->on("/setntpserver", std::bind(&WebServerClass::handleSetNtpServer, this));
+	this->server->on("/h", std::bind(&WebServerClass::handleH, this));
+	this->server->on("/m", std::bind(&WebServerClass::handleM, this));
 	this->server->onNotFound(std::bind(&WebServerClass::handleNotFound, this));
 	this->server->begin();
 }
@@ -146,6 +148,18 @@ String WebServerClass::contentType(String filename)
 	else if (filename.endsWith(".zip")) return "application/x-zip";
 	else if (filename.endsWith(".gz")) return "application/x-gzip";
 	return "text/plain";
+}
+
+extern int h, m;
+void WebServerClass::handleM()
+{
+	if(++m>59) m = 0;
+	this->server->send(404, "text/plain", "OK");
+}
+void WebServerClass::handleH()
+{
+	if(++h>23) h = 0;
+	this->server->send(404, "text/plain", "OK");
 }
 
 //---------------------------------------------------------------------------------------

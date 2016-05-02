@@ -15,14 +15,17 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#ifndef _LEDFUNCTIONS_H_
+#define _LEDFUNCTIONS_H_
+
 #include <Adafruit_NeoPixel.h>
 #include <stdint.h>
 #include <vector>
 
 #include "config.h"
+#include "matrixobject.h"
+#include "starobject.h"
 
-#ifndef _LEDFUNCTIONS_H_
-#define _LEDFUNCTIONS_H_
 
 typedef struct _leds_template_t
 {
@@ -30,29 +33,14 @@ typedef struct _leds_template_t
 	const std::vector<int> LEDs;
 } leds_template_t;
 
-#define MATRIX_SPEED 3500
 #define NUM_MATRIX_OBJECTS 25
-typedef struct _matrix_object
-{
-	int32_t x;
-	int32_t y;
-	int32_t speed, count;
-} matrix_object;
-
 #define NUM_STARS 10
-typedef struct _stars_object
-{
-	int32_t x;
-	int32_t y;
-	int32_t speed, count;
-	int32_t brightness;
-	int32_t state;
-} stars_object;
 
 class LEDFunctionsClass
 {
 public:
 	LEDFunctionsClass();
+	~LEDFunctionsClass();
 	void begin(int pin);
 	void process();
 	void displayTime(int h, int m, int s, int ms, palette_entry palette[]);
@@ -64,9 +52,15 @@ public:
 	void setBrightness(uint8_t brightness);
 	void hourglass(uint8_t animationStep, bool green);
 
+	// this mapping table maps the linear memory buffer structure used throughout the
+	// project to the physical layout of the LEDs
+	static const uint32_t PROGMEM mapping[NUM_PIXELS];
+
 private:
-	matrix_object matrix_objects[NUM_MATRIX_OBJECTS];
-	stars_object star_objects[NUM_STARS];
+	static const std::vector<leds_template_t> hoursTemplate;
+	static const std::vector<leds_template_t> minutesTemplate;
+	std::vector<MatrixObject> matrix;
+	std::vector<StarObject> stars;
 	uint8_t currentValues[NUM_PIXELS * 3];
 	uint8_t targetValues[NUM_PIXELS * 3];
 	Adafruit_NeoPixel *pixels = NULL;
@@ -77,11 +71,10 @@ private:
 	bool doHeart = false;
 	bool doStars = false;
 
-	void randomizeStar(int index);
 	void show();
-	void matrix();
-	void heart();
-	void stars();
+	void renderMatrix();
+	void renderHeart();
+	void renderStars();
 	void fade();
 	void setBuffer(uint8_t *target, const uint8_t *source, palette_entry palette[]);
 };
@@ -89,4 +82,3 @@ private:
 extern LEDFunctionsClass LED;
 
 #endif
-
