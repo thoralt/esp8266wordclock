@@ -112,7 +112,7 @@ void StarObject::render(uint8_t* buf, std::vector<StarObject> &allStars)
 	this->update(allStars);
 
 	// write brightness to target buffer
-	int offset = LEDFunctionsClass::mapping[this->x + this->y * 11] * 3;
+	int offset = LEDFunctionsClass::getOffset(this->x, this->y);
 	buf[offset + 0] = this->brightness;
 	buf[offset + 1] = this->brightness;
 	buf[offset + 2] = this->brightness;

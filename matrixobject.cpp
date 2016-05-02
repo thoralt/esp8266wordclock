@@ -56,7 +56,7 @@ void MatrixObject::move()
 	{
 		this->count -= 30000;
 		this->y++;
-		if((this->y - MatrixObject::MatrixGradient.size()) > 10) this->randomize();
+		if(this->y > 10 + (int)MatrixObject::MatrixGradient.size()) this->randomize();
 	}
 }
 
@@ -72,7 +72,7 @@ void MatrixObject::randomize()
 {
 	this->x = random(11);
 	this->y = random(25) - 25;
-	this->speed = MatrixObject::MatrixSpeed;
+	this->speed = MatrixObject::MatrixSpeed + random(4000);
 	this->count = 0;
 }
 
@@ -88,17 +88,17 @@ void MatrixObject::render(uint8_t *buf)
 {
 	this->move();
 
-	int a = this->y;
-	int b = this->x;
+	int a = this->x;
+	int b = this->y;
 	for (palette_entry p : MatrixObject::MatrixGradient)
 	{
 		if (b >= 0 && b < 10)
 		{
-			int ofs = LEDFunctionsClass::mapping[a + b * 11] * 3;
+			int ofs = LEDFunctionsClass::getOffset(a, b);
 			buf[ofs + 0] = p.r;
 			buf[ofs + 1] = p.g;
 			buf[ofs + 2] = p.b;
 		}
-		y--;
+		b--;
 	}
 }

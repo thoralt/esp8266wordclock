@@ -26,7 +26,6 @@
 #include "matrixobject.h"
 #include "starobject.h"
 
-
 typedef struct _leds_template_t
 {
 	int param0, param1, param2;
@@ -52,9 +51,7 @@ public:
 	void setBrightness(uint8_t brightness);
 	void hourglass(uint8_t animationStep, bool green);
 
-	// this mapping table maps the linear memory buffer structure used throughout the
-	// project to the physical layout of the LEDs
-	static const uint32_t PROGMEM mapping[NUM_PIXELS];
+	static int getOffset(int x, int y);
 
 private:
 	static const std::vector<leds_template_t> hoursTemplate;
@@ -77,6 +74,10 @@ private:
 	void renderStars();
 	void fade();
 	void setBuffer(uint8_t *target, const uint8_t *source, palette_entry palette[]);
+
+	// this mapping table maps the linear memory buffer structure used throughout the
+	// project to the physical layout of the LEDs
+	static const uint32_t PROGMEM mapping[NUM_PIXELS];
 };
 
 extern LEDFunctionsClass LED;

@@ -54,8 +54,8 @@ BrightnessClass::BrightnessClass()
 //---------------------------------------------------------------------------------------
 uint32_t BrightnessClass::filter(uint16_t input)
 {
-	uint32_t tmp = (65536 - FILTER_COEFFICIENT)
-			* this->avg + (uint32_t)input*FILTER_COEFFICIENT;
+	uint32_t tmp = (65536 - FILTER_COEFFICIENT) * this->avg
+			     + FILTER_COEFFICIENT * (uint32_t)input;
 	return (tmp + 32768) >> 16;
 }
 

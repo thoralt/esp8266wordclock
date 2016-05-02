@@ -331,6 +331,20 @@ void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[],
 }
 
 //---------------------------------------------------------------------------------------
+// getOffset
+//
+// Calculates the offset of a given RGB triplet inside the LED buffer.
+//
+// -> x: x coordinate
+//    y: y coordinate
+// <- offset for given coordinates
+//---------------------------------------------------------------------------------------
+int LEDFunctionsClass::getOffset(int x, int y)
+{
+	return LEDFunctionsClass::mapping[x + y * 11] * 3;
+}
+
+//---------------------------------------------------------------------------------------
 // setBuffer
 //
 // Fills a buffer (e. g. this->targetValues) with color data based on indexed source
@@ -412,14 +426,16 @@ void LEDFunctionsClass::fade()
 void LEDFunctionsClass::show()
 {
 	uint8_t *data = this->currentValues;
+	int ofs = 0;
 
 	// copy current color values to LED object and display it
 	for (int i = 0; i < NUM_PIXELS; i++)
 	{
 		this->pixels->setPixelColor(i,
-				pixels->Color(((int) data[i * 3 + 0] * this->brightness) >> 8,
-						((int) data[i * 3 + 1] * this->brightness) >> 8,
-						((int) data[i * 3 + 2] * this->brightness) >> 8));
+				pixels->Color(((int) data[ofs + 0] * this->brightness) >> 8,
+						      ((int) data[ofs + 1] * this->brightness) >> 8,
+						      ((int) data[ofs + 2] * this->brightness) >> 8));
+		ofs += 3;
 	}
 	this->pixels->show();
 }

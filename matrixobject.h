@@ -26,7 +26,7 @@
 class MatrixObject
 {
 public:
-	bool operator<(const MatrixObject &other) const { return y < other.y; }
+	bool operator<(const MatrixObject &other) const { return other.y < y; }
 	MatrixObject();
 	void render(uint8_t *buf);
 
@@ -34,9 +34,9 @@ private:
 	void randomize();
 	void move();
 
-	static const int MatrixSpeed = 3500;
+	static const int MatrixSpeed = 2000;
 	static const std::vector<palette_entry> MatrixGradient;
-	int speed = 0;
+	int speed = MatrixObject::MatrixSpeed;
 	int count = 0;
 	int x = 0;
 	int y = 0;
