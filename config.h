@@ -42,6 +42,11 @@ typedef struct _config_struct
 
 #define EEPROM_SIZE 512
 
+enum class DisplayMode
+{
+	plain, fade, flyingLettersVertical, matrix, heart, stars
+};
+
 class ConfigClass
 {
 public:
@@ -59,6 +64,8 @@ public:
 	palette_entry s;
 	IPAddress ntpserver = IPAddress(0, 0, 0, 0);
 	bool heartbeat = true;
+
+	DisplayMode mode = DisplayMode::flyingLettersVertical;
 
 private:
 	// copy of EEPROM content

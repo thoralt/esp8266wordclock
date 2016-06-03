@@ -23,14 +23,23 @@
 // initializes the static gradient palette
 //---------------------------------------------------------------------------------------
 const std::vector<palette_entry> MatrixObject::MatrixGradient = {
-	{255, 255, 255}, {128, 255, 128}, {64, 255, 64}, {0, 255, 0},
-	{0, 128, 0}, {0, 64, 0}, {0, 32, 0}, {0, 16, 0},
-	{0, 8, 0}, {0, 2, 0}, {0, 1, 0}, {0, 0, 0}};
+	{ 255, 255, 255 },
+	{ 128, 255, 128 },
+	{ 64, 255, 64 },
+	{ 0, 255, 0 },
+	{ 0, 128, 0 },
+	{ 0, 64, 0 },
+	{ 0, 32, 0 },
+	{ 0, 16, 0 },
+	{ 0, 8, 0 },
+	{ 0, 2, 0 },
+	{ 0, 1, 0 },
+	{ 0, 0, 0 } };
 
 //---------------------------------------------------------------------------------------
 // MatrixObject
 //
-// Constructor. Initializes coordinates with random values.
+// Constructor. Initializes coordinates and speed with random values.
 //
 // -> --
 // <- --
@@ -51,12 +60,13 @@ MatrixObject::MatrixObject()
 //---------------------------------------------------------------------------------------
 void MatrixObject::move()
 {
-	this->count += this->speed;
-	if (this->count > 30000)
+	this->prescaler += this->speed;
+	if (this->prescaler > 30000)
 	{
-		this->count -= 30000;
+		this->prescaler -= 30000;
 		this->y++;
-		if(this->y > 10 + (int)MatrixObject::MatrixGradient.size()) this->randomize();
+		int limit = LEDFunctionsClass::height + MatrixObject::MatrixGradient.size();
+		if(this->y > limit) this->randomize();
 	}
 }
 
@@ -70,16 +80,18 @@ void MatrixObject::move()
 //---------------------------------------------------------------------------------------
 void MatrixObject::randomize()
 {
-	this->x = random(11);
+	this->x = random(LEDFunctionsClass::width + 1);
 	this->y = random(25) - 25;
-	this->speed = MatrixObject::MatrixSpeed + random(4000);
-	this->count = 0;
+	this->speed = MatrixObject::MinMatrixSpeed
+			+ random(MatrixObject::MaxMatrixSpeed - MatrixObject::MinMatrixSpeed);
+	this->prescaler = 0;
 }
 
 //---------------------------------------------------------------------------------------
 // render
 //
-// Moves and renders the matrix object to an RGB buffer.
+// Moves and renders the matrix object to an RGB buffer. Uses the MatrixGradient palette
+// to draw the matrix stream object from bottom to top.
 //
 // -> buf: Pointer to render target (linear RGB buffer)
 // <- --
@@ -88,17 +100,19 @@ void MatrixObject::render(uint8_t *buf)
 {
 	this->move();
 
-	int a = this->x;
-	int b = this->y;
+	int size = LEDFunctionsClass::height * LEDFunctionsClass::width * 3;
+	int ofs = LEDFunctionsClass::getOffset(this->x, this->y);
+	int decrement = LEDFunctionsClass::width * 3;
+
 	for (palette_entry p : MatrixObject::MatrixGradient)
 	{
-		if (b >= 0 && b < 10)
+		// only render if inside screen rectangle
+		if (ofs >= 0 && ofs < size)
 		{
-			int ofs = LEDFunctionsClass::getOffset(a, b);
 			buf[ofs + 0] = p.r;
 			buf[ofs + 1] = p.g;
 			buf[ofs + 2] = p.b;
 		}
-		b--;
+		ofs -= decrement;
 	}
 }

@@ -181,24 +181,28 @@ void LEDFunctionsClass::hourglass(uint8_t animationStep, bool green)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::process()
 {
-	// check for flags to display matrix, heart or stars
-	if (this->doMatrix)
+	switch(Config.mode)
 	{
+	case DisplayMode::flyingLettersVertical:
+		this->renderFlyingLetters();
+		break;
+	case DisplayMode::matrix:
 		this->renderMatrix();
-	}
-	else if (this->doHeart)
-	{
+		break;
+	case DisplayMode::heart:
 		this->renderHeart();
-	}
-	else if (this->doStars)
-	{
+		break;
+	case DisplayMode::stars:
 		this->renderStars();
-	}
-	else
-	{
-		// no special fx -> do normal fading and display current state
+		break;
+	case DisplayMode::fade:
 		this->fade();
 		this->show();
+		break;
+	case DisplayMode::plain:
+	default:
+		this->show();
+		break;
 	}
 }
 
@@ -216,6 +220,17 @@ void LEDFunctionsClass::setBrightness(uint8_t brightness)
 	this->brightness = brightness;
 }
 
+
+// Initializes the buffer with either background (=0) or seconds progress (=2)
+// part of the background will be illuminated with color 2 depending on current
+// seconds/milliseconds value, whole screen is backlit when seconds = 59
+void LEDFunctionsClass::fillBackground(int seconds, int milliseconds, uint8_t *buf)
+{
+	int pos = (((seconds * 1000 + milliseconds) * 110) / 60000) + 1;
+	for (int i = 0; i < NUM_PIXELS; i++) buf[i] = (i < pos) ? 2 : 0;
+
+}
+
 //---------------------------------------------------------------------------------------
 // displayTime
 //
@@ -226,25 +241,29 @@ void LEDFunctionsClass::setBrightness(uint8_t brightness)
 //	palette: Array of 3 palette entries (background, foreground, seconds progress)
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
-		palette_entry palette[])
+void LEDFunctionsClass::displayTime(int h, int m, int s, int ms)
 {
+	// load palette colors from configuration
+	palette_entry palette[] = {
+		{Config.bg.r, Config.bg.g, Config.bg.b},
+		{Config.fg.r, Config.fg.g, Config.fg.b},
+		{Config.s.r,  Config.s.g,  Config.s.b}};
+
+	this->lastS = s;
+	this->lastMS = ms;
+
 	// buffer to hold pixel states as palette indexes
 	uint8_t buf[NUM_PIXELS];
 
-	// initialize the buffer with either background (=0) or seconds progress (=2)
-	// part of the background will be illuminated with color 2 depending on current
-	// seconds/milliseconds value, whole screen is backlit when seconds = 59
-	int pos = (((s * 1000 + ms) * 110) / 60000) + 1;
-	for (int i = 0; i < NUM_PIXELS; i++) buf[i] = (i < pos) ? 2 : 0;
+	this->fillBackground(s, ms, buf);
 
 	// set static LEDs
-	buf[0 * 11 + 0] = 1; // E
-	buf[0 * 11 + 1] = 1; // S
+	buf[0] = 1; // E
+	buf[1] = 1; // S
 
-	buf[0 * 11 + 3] = 1; // I
-	buf[0 * 11 + 4] = 1; // S
-	buf[0 * 11 + 5] = 1; // T
+	buf[3] = 1; // I
+	buf[4] = 1; // S
+	buf[5] = 1; // T
 
 	// minutes 1...4 for the corners
 	for(int i=0; i<=((m%5)-1); i++) buf[10 * 11 + i] = 1;
@@ -272,7 +291,7 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 	{
 		// test if this template matches the current hour
 		if((t.param1 == h || t.param2 == h) &&
-		   ((t.param0 == 1 && m < 5) ||  // special case full hour
+		   ((t.param0 == 1 && m < 5)  || // special case full hour
 			(t.param0 == 2 && m >= 5) || // special case hour + minutes
 			(t.param0 == 0)))            // normal case
 		{
@@ -282,8 +301,23 @@ void LEDFunctionsClass::displayTime(int h, int m, int s, int ms,
 		}
 	}
 
-	// set the new values as target for fade operation
-	this->set(buf, palette);
+	if(Config.mode == DisplayMode::flyingLettersVertical)
+	{
+		// end here if flying letters animation is active
+
+		// check if the displayed time has changed
+		if((m/5 != this->lastM/5) || (h != this->lastH))
+		{
+			this->prepareFlyingLetters(buf);
+		}
+		this->lastM = m;
+		this->lastH = h;
+	}
+	else
+	{
+		// set the new values as target for fade operation
+		this->set(buf, palette);
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -334,6 +368,7 @@ void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[],
 // getOffset
 //
 // Calculates the offset of a given RGB triplet inside the LED buffer.
+// Does range checking for x and y.
 //
 // -> x: x coordinate
 //    y: y coordinate
@@ -341,7 +376,14 @@ void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[],
 //---------------------------------------------------------------------------------------
 int LEDFunctionsClass::getOffset(int x, int y)
 {
-	return LEDFunctionsClass::mapping[x + y * 11] * 3;
+	if (x>=0 && y>=0 && x<LEDFunctionsClass::width && y<LEDFunctionsClass::height)
+	{
+		return LEDFunctionsClass::mapping[x + y*LEDFunctionsClass::width] * 3;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 //---------------------------------------------------------------------------------------
@@ -400,18 +442,12 @@ void LEDFunctionsClass::fade()
 	for (int i = 0; i < NUM_PIXELS * 3; i++)
 	{
 		delta = this->targetValues[i] - this->currentValues[i];
-		if (delta > 64)
-			this->currentValues[i] += 8;
-		else if (delta > 16)
-			this->currentValues[i] += 4;
-		else if (delta > 0)
-			this->currentValues[i]++;
-		else if (delta < -64)
-			this->currentValues[i] -= 8;
-		else if (delta < -16)
-			this->currentValues[i] -= 4;
-		else if (delta < 0)
-			this->currentValues[i]--;
+		if (delta > 64) this->currentValues[i] += 8;
+		else if (delta > 16) this->currentValues[i] += 4;
+		else if (delta > 0) this->currentValues[i]++;
+		else if (delta < -64) this->currentValues[i] -= 8;
+		else if (delta < -16) this->currentValues[i] -= 4;
+		else if (delta < 0) this->currentValues[i]--;
 	}
 }
 
@@ -450,7 +486,8 @@ void LEDFunctionsClass::show()
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::showHeart(bool show)
 {
-	this->doHeart = show;
+	if(show) Config.mode = DisplayMode::heart;
+	else Config.mode = DisplayMode::flyingLettersVertical;
 }
 
 //---------------------------------------------------------------------------------------
@@ -463,7 +500,8 @@ void LEDFunctionsClass::showHeart(bool show)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::showStars(bool show)
 {
-	this->doStars = show;
+	if(show) Config.mode = DisplayMode::stars;
+	else Config.mode = DisplayMode::flyingLettersVertical;
 }
 
 //---------------------------------------------------------------------------------------
@@ -476,7 +514,8 @@ void LEDFunctionsClass::showStars(bool show)
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::showMatrix(bool show)
 {
-	this->doMatrix = show;
+	if(show) Config.mode = DisplayMode::matrix;
+	else Config.mode = DisplayMode::flyingLettersVertical;
 }
 
 //---------------------------------------------------------------------------------------
@@ -571,4 +610,139 @@ void LEDFunctionsClass::renderHeart()
 
 	if (this->heartBrightness > 255) this->heartBrightness = 255;
 	if (this->heartBrightness < 0) this->heartBrightness = 0;
+}
+
+//---------------------------------------------------------------------------------------
+// prepareFlyingLetters
+//
+// Sets the current buffer as target state for flying letters, initializes current
+// positions of the letters below the visible area with some random jitter
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void LEDFunctionsClass::prepareFlyingLetters(uint8_t *target)
+{
+	// transfer the previous flying letters in the leaving letters vector to prepare for
+	// outgoing animation
+	this->leavingLetters.clear();
+	for(xy_t &p : this->arrivingLetters)
+	{
+		// delay every letter depending on its position
+		p.delay = p.y * 2 + p.x + 1 + random(5);
+		p.yTarget = -1;
+		this->leavingLetters.push_back(p);
+	}
+
+	// initialize arriving letters from scratch
+	this->arrivingLetters.clear();
+	int ofs = 0;
+
+	// iterate over every position in the screen buffer
+	for(int y=0; y<LEDFunctionsClass::height; y++)
+	{
+		for(int x=0; x<LEDFunctionsClass::width; x++)
+		{
+			// create entry in arrivingLetters vector if current pixel is foreground
+			if(target[ofs++] == 1)
+			{
+				xy_t p = {x, y, x, LEDFunctionsClass::height,
+						y * 2 + x + 1 + random(5), 333, 0};
+				this->arrivingLetters.push_back(p);
+			}
+		}
+	}
+}
+
+//---------------------------------------------------------------------------------------
+// renderFlyingLetters
+//
+// Takes the current arrivingLetters and leavingLetters to render the flying letters
+// animation
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void LEDFunctionsClass::renderFlyingLetters()
+{
+	// load palette colors from configuration
+	palette_entry palette[] = {
+		{Config.bg.r, Config.bg.g, Config.bg.b},
+		{Config.fg.r, Config.fg.g, Config.fg.b},
+		{Config.s.r,  Config.s.g,  Config.s.b}};
+
+	// create empty buffer filled with seconds color
+	uint8_t buf[NUM_PIXELS];
+	this->fillBackground(this->lastS, this->lastMS, buf);
+
+	// minutes 1...4 for the corners
+	for(int i=0; i<=((this->lastM%5)-1); i++) buf[10 * 11 + i] = 1;
+
+	// leaving letters animation has priority
+	if(this->leavingLetters.size() > 0)
+	{
+		// count actually moved letters to detect end of animation
+		int movedLetters = 0;
+
+		// iterate over all leavingLetters
+		for(xy_t &p : this->leavingLetters)
+		{
+			// draw letter only if inside visible area
+			if(p.x>=0 && p.y>=0 && p.x<LEDFunctionsClass::width
+					&& p.y<LEDFunctionsClass::height)
+				buf[p.x + p.y * LEDFunctionsClass::width] = 1;
+
+			// continue with next letter if the current letter already
+			// reached its target position
+			if(p.y == p.yTarget && p.x == p.xTarget) continue;
+			p.counter += p.speed;
+			movedLetters++;
+			if(p.counter >= 1000)
+			{
+				p.counter -= 1000;
+				if(p.delay>0)
+				{
+					// do not move if animation of current letter is delayed
+					p.delay--;
+				}
+				else
+				{
+					p.y--;
+				}
+			}
+		}
+		if(movedLetters == 0) this->leavingLetters.clear();
+	}
+	else
+	{
+		// iterate over all arrivingLetters
+		for(xy_t &p : this->arrivingLetters)
+		{
+			// draw letter only if inside visible area
+			if(p.x>=0 && p.y>=0 && p.x<LEDFunctionsClass::width
+					&& p.y<LEDFunctionsClass::height)
+				buf[p.x + p.y * LEDFunctionsClass::width] = 1;
+
+			// continue with next letter if the current letter already
+			// reached its target position
+			if(p.y == p.yTarget && p.x == p.xTarget) continue;
+			p.counter += p.speed;
+			if(p.counter >= 1000)
+			{
+				p.counter -= 1000;
+				if(p.delay>0)
+				{
+					// do not move if animation of current letter is delayed
+					p.delay--;
+				}
+				else
+				{
+					p.y--;
+				}
+			}
+		}
+	}
+
+	// present the current content immediately without fading
+	this->set(buf, palette, true);
 }

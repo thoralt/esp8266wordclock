@@ -19,11 +19,15 @@
 #include "starobject.h"
 #include "ledfunctions.h"
 
+//---------------------------------------------------------------------------------------
+// StarObject
+//
+// Constructor
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
 StarObject::StarObject()
-{
-}
-
-StarObject::~StarObject()
 {
 }
 
@@ -52,8 +56,8 @@ void StarObject::randomize(std::vector<StarObject> &allStars)
 		distanceOK = true;
 
 		// create new random pair
-		newX = random(11);
-		newY = random(10);
+		newX = random(LEDFunctionsClass::width + 1);
+		newY = random(LEDFunctionsClass::height + 1);
 		retryCount++;
 
 		// iterate over all other stars and check distance to newly generated coordinate
@@ -81,6 +85,16 @@ void StarObject::randomize(std::vector<StarObject> &allStars)
 	this->brightness = 0;
 }
 
+//---------------------------------------------------------------------------------------
+// update
+//
+// Updates the state of the star object. Increases brightness up to maximum, then
+// decreases to zero, then randomizes to new coordinates and speed and starts again.
+//
+// -> allStars: Reference to vector containing all stars, necessary for distance
+//              calculation when creating new random position
+// <- --
+//---------------------------------------------------------------------------------------
 void StarObject::update(std::vector<StarObject> &allStars)
 {
 	// increase or decrease brightness depending on current state
@@ -107,6 +121,16 @@ void StarObject::update(std::vector<StarObject> &allStars)
 	}
 }
 
+//---------------------------------------------------------------------------------------
+// render
+//
+// Updates own status (see StarObject::update()) and renders self to buffer.
+//
+// -> buf: RGB buffer for LED colors
+//    allStars: Reference to vector containing all stars, necessary for distance
+//              calculation when creating new random position
+// <- --
+//---------------------------------------------------------------------------------------
 void StarObject::render(uint8_t* buf, std::vector<StarObject> &allStars)
 {
 	this->update(allStars);

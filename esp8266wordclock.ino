@@ -332,6 +332,8 @@ void setup()
 //-----------------------------------------------------------------------------------
 void loop()
 {
+	delay(10);
+
 	// do OTA update stuff
 	ArduinoOTA.handle();
 
@@ -354,25 +356,17 @@ void loop()
 	// do web server stuff
 	WebServer.process();
 
-	// load palette colors from configuration
-	palette_entry p[] = {
-		{Config.bg.r, Config.bg.g, Config.bg.b},
-		{Config.fg.r, Config.fg.g, Config.fg.b},
-		{Config.s.r,  Config.s.g,  Config.s.b}};
-
 	if (!WebServer.showHourglass)
 	{
 		LED.showHeart(WebServer.showHeart || (h == 22 && m == 00));
 		LED.showMatrix(WebServer.showMatrix || (h == 13 && m == 37));
 		LED.showStars(WebServer.showStars || (h == 23 && m == 00));
-		LED.displayTime(h, m, s, ms, p);
+		LED.displayTime(h, m, s, ms);
 		LED.setBrightness(Brightness.value());
 		LED.process();
 	}
 
-	delay(10);
-
-	// output current time if second value has changed
+	// output current time if seconds value has changed
 	if (s != lastSecond)
 	{
 		lastSecond = s;

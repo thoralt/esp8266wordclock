@@ -32,6 +32,11 @@ typedef struct _leds_template_t
 	const std::vector<int> LEDs;
 } leds_template_t;
 
+typedef struct _xy_t
+{
+	int xTarget, yTarget, x, y, delay, speed, counter;
+} xy_t;
+
 #define NUM_MATRIX_OBJECTS 25
 #define NUM_STARS 10
 
@@ -42,7 +47,7 @@ public:
 	~LEDFunctionsClass();
 	void begin(int pin);
 	void process();
-	void displayTime(int h, int m, int s, int ms, palette_entry palette[]);
+	void displayTime(int h, int m, int s, int ms);
 	void set(const uint8_t *buf, palette_entry palette[]);
 	void set(const uint8_t *buf, palette_entry palette[], bool immediately);
 	void showHeart(bool show);
@@ -52,10 +57,15 @@ public:
 	void hourglass(uint8_t animationStep, bool green);
 
 	static int getOffset(int x, int y);
+	static const int width = 11;
+	static const int height = 10;
 
 private:
 	static const std::vector<leds_template_t> hoursTemplate;
 	static const std::vector<leds_template_t> minutesTemplate;
+
+	std::vector<xy_t> arrivingLetters;
+	std::vector<xy_t> leavingLetters;
 	std::vector<MatrixObject> matrix;
 	std::vector<StarObject> stars;
 	uint8_t currentValues[NUM_PIXELS * 3];
@@ -64,16 +74,20 @@ private:
 	int heartBrightness = 0;
 	int heartState = 0;
 	int brightness = 96;
-	bool doMatrix = false;
-	bool doHeart = false;
-	bool doStars = false;
+	int lastM = -1;
+	int lastH = -1;
+	int lastS = -1;
+	int lastMS = -1;
 
+	void fillBackground(int seconds, int milliseconds, uint8_t *buf);
 	void show();
 	void renderMatrix();
 	void renderHeart();
 	void renderStars();
+	void renderFlyingLetters();
 	void fade();
 	void setBuffer(uint8_t *target, const uint8_t *source, palette_entry palette[]);
+	void prepareFlyingLetters(uint8_t *target);
 
 	// this mapping table maps the linear memory buffer structure used throughout the
 	// project to the physical layout of the LEDs

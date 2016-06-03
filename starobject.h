@@ -26,7 +26,6 @@ class StarObject
 {
 public:
 	StarObject();
-	virtual ~StarObject();
 	void render(uint8_t *buf, std::vector<StarObject> &allStars);
 	void randomize(std::vector<StarObject> &allStars);
 
