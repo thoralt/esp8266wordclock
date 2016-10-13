@@ -47,14 +47,9 @@ public:
 	~LEDFunctionsClass();
 	void begin(int pin);
 	void process();
-	void displayTime(int h, int m, int s, int ms);
-	void set(const uint8_t *buf, palette_entry palette[]);
-	void set(const uint8_t *buf, palette_entry palette[], bool immediately);
-	void showHeart(bool show);
-	void showStars(bool show);
-	void showMatrix(bool show);
+	void setTime(int h, int m, int s, int ms);
 	void setBrightness(uint8_t brightness);
-	void hourglass(uint8_t animationStep, bool green);
+	void setMode(DisplayMode newMode);
 
 	static int getOffset(int x, int y);
 	static const int width = 11;
@@ -63,6 +58,8 @@ public:
 private:
 	static const std::vector<leds_template_t> hoursTemplate;
 	static const std::vector<leds_template_t> minutesTemplate;
+
+	DisplayMode mode = DisplayMode::plain;
 
 	std::vector<xy_t> arrivingLetters;
 	std::vector<xy_t> leavingLetters;
@@ -74,24 +71,41 @@ private:
 	int heartBrightness = 0;
 	int heartState = 0;
 	int brightness = 96;
+	int h = 0;
+	int m = 0;
+	int s = 0;
+	int ms = 0;
 	int lastM = -1;
 	int lastH = -1;
-	int lastS = -1;
-	int lastMS = -1;
 
 	void fillBackground(int seconds, int milliseconds, uint8_t *buf);
 	void show();
+	void renderRed();
+	void renderGreen();
+	void renderBlue();
 	void renderMatrix();
 	void renderHeart();
 	void renderStars();
+	void renderUpdate();
+	void renderUpdateComplete();
+	void renderUpdateError();
+	void renderHourglass(uint8_t animationStep, bool green);
+	void renderWifiManager();
+	void renderTime(uint8_t *target);
 	void renderFlyingLetters();
+	void prepareFlyingLetters(uint8_t *source);
 	void fade();
+	void set(const uint8_t *buf, palette_entry palette[]);
+	void set(const uint8_t *buf, palette_entry palette[], bool immediately);
 	void setBuffer(uint8_t *target, const uint8_t *source, palette_entry palette[]);
-	void prepareFlyingLetters(uint8_t *target);
 
 	// this mapping table maps the linear memory buffer structure used throughout the
 	// project to the physical layout of the LEDs
 	static const uint32_t PROGMEM mapping[NUM_PIXELS];
+
+	static const uint32_t PROGMEM brightnessAdjustR[NUM_PIXELS];
+	static const uint32_t PROGMEM brightnessAdjustG[NUM_PIXELS];
+	static const uint32_t PROGMEM brightnessAdjustB[NUM_PIXELS];
 };
 
 extern LEDFunctionsClass LED;
