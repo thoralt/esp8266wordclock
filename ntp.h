@@ -25,8 +25,6 @@
 #include <Ticker.h>
 #include <WiFiUdp.h>
 
-#define STRING2(i) (((i<10) ? String("0") : String("")) + String(i))
-
 // type definition for NTP callback
 typedef void (*TNtpCallback)(uint8_t, uint8_t, uint8_t, uint8_t);
 

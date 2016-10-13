@@ -205,8 +205,7 @@ void NtpClass::parse()
 	this->s = (epoch % 60);
 	this->ms = 0;
 
-	Serial.print("ms), local time: ");
-	Serial.println(STRING2(this->h) + ":" + STRING2(this->m) + ":" + STRING2(this->s));
+	Serial.printf("ms), local time: %02i:%02i:%02i\r\n", h, m, s);
 }
 
 //---------------------------------------------------------------------------------------
