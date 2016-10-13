@@ -32,12 +32,6 @@ public:
 	void begin();
 	void process();
 
-	bool showMatrix = false;
-	bool showHeart = false;
-	bool showStars = false;
-	bool showHourglass = false;
-	bool showGreenHourglass = false;
-
 private:
 	ESP8266WebServer *server = NULL;
 
@@ -45,17 +39,19 @@ private:
 	bool serveFile(String path);
 	void handleSaveConfig();
 	void handleLoadConfig();
-	void handleHourglass();
 	void handleGetColors();
 	void handleSetColor();
 	void handleNotFound();
-	void handleMatrix();
-	void handleHeart();
-	void handleHeartbeat();
-	void handleStars();
+	void handleSetMode();
+	void handleGetMode();
+	void handleSetHeartbeat();
+	void handleGetHeartbeat();
 	void handleInfo();
 	void handleH();
 	void handleM();
+	void handleR();
+	void handleG();
+	void handleB();
 	void handleGetNtpServer();
 	void handleSetNtpServer();
 	void extractColor(String argName, palette_entry& result);

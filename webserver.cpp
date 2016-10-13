@@ -21,6 +21,7 @@
 #include <FS.h>
 #include <ArduinoJson.h>
 
+#include "ledfunctions.h"
 #include "webserver.h"
 #include "ntp.h"
 
@@ -73,16 +74,19 @@ void WebServerClass::begin()
 	this->server->on("/info", std::bind(&WebServerClass::handleInfo, this));
 	this->server->on("/saveconfig", std::bind(&WebServerClass::handleSaveConfig, this));
 	this->server->on("/loadconfig", std::bind(&WebServerClass::handleLoadConfig, this));
-	this->server->on("/matrix", std::bind(&WebServerClass::handleMatrix, this));
-	this->server->on("/heart", std::bind(&WebServerClass::handleHeart, this));
-	this->server->on("/stars", std::bind(&WebServerClass::handleStars, this));
-	this->server->on("/heartbeat", std::bind(&WebServerClass::handleHeartbeat, this));
-	this->server->on("/hourglass", std::bind(&WebServerClass::handleHourglass, this));
+	this->server->on("/setheartbeat", std::bind(&WebServerClass::handleSetHeartbeat, this));
+	this->server->on("/getheartbeat", std::bind(&WebServerClass::handleGetHeartbeat, this));
 	this->server->on("/getcolors", std::bind(&WebServerClass::handleGetColors, this));
 	this->server->on("/getntpserver", std::bind(&WebServerClass::handleGetNtpServer, this));
 	this->server->on("/setntpserver", std::bind(&WebServerClass::handleSetNtpServer, this));
 	this->server->on("/h", std::bind(&WebServerClass::handleH, this));
 	this->server->on("/m", std::bind(&WebServerClass::handleM, this));
+	this->server->on("/r", std::bind(&WebServerClass::handleR, this));
+	this->server->on("/g", std::bind(&WebServerClass::handleG, this));
+	this->server->on("/b", std::bind(&WebServerClass::handleB, this));
+	this->server->on("/setmode", std::bind(&WebServerClass::handleSetMode, this));
+	this->server->on("/getmode", std::bind(&WebServerClass::handleGetMode, this));
+
 	this->server->onNotFound(std::bind(&WebServerClass::handleNotFound, this));
 	this->server->begin();
 }
@@ -150,16 +154,137 @@ String WebServerClass::contentType(String filename)
 	return "text/plain";
 }
 
+//---------------------------------------------------------------------------------------
+// handleM
+//
+// Handles the /m request, increments the minutes counter (for testing purposes)
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
 extern int h, m;
 void WebServerClass::handleM()
 {
 	if(++m>59) m = 0;
-	this->server->send(404, "text/plain", "OK");
+	this->server->send(200, "text/plain", "OK");
 }
+
+//---------------------------------------------------------------------------------------
+// handleH
+//
+// Handles the /h request, increments the hours counter (for testing purposes)
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
 void WebServerClass::handleH()
 {
 	if(++h>23) h = 0;
-	this->server->send(404, "text/plain", "OK");
+	this->server->send(200, "text/plain", "OK");
+}
+
+//---------------------------------------------------------------------------------------
+// handleR
+//
+// Handles the /r request, sets LED matrix to all red (for testing purposes)
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleR()
+{
+	LED.setMode(DisplayMode::red);
+	this->server->send(200, "text/plain", "OK");
+}
+
+//---------------------------------------------------------------------------------------
+// handleG
+//
+// Handles the /g request, sets LED matrix to all green (for testing purposes)
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleG()
+{
+	LED.setMode(DisplayMode::green);
+	this->server->send(200, "text/plain", "OK");
+}
+
+//---------------------------------------------------------------------------------------
+// handleB
+//
+// Handles the /b request, sets LED matrix to all blue (for testing purposes)
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleB()
+{
+	LED.setMode(DisplayMode::blue);
+	this->server->send(200, "text/plain", "OK");
+}
+
+//---------------------------------------------------------------------------------------
+// handleSetMode
+//
+// Handles the /setmode request. Sets the display mode to one of the allowed values,
+// saves it as the new default mode.
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleSetMode()
+{
+	DisplayMode mode = DisplayMode::invalid;
+
+	if(this->server->hasArg("value"))
+	{
+		// handle each allowed value for safety
+		if(this->server->arg("value") == "0") mode = DisplayMode::plain;
+		if(this->server->arg("value") == "1") mode = DisplayMode::fade;
+		if(this->server->arg("value") == "2") mode = DisplayMode::flyingLettersVerticalUp;
+		if(this->server->arg("value") == "3") mode = DisplayMode::flyingLettersVerticalDown;
+	}
+
+	if(mode == DisplayMode::invalid)
+	{
+		this->server->send(400, "text/plain", "ERR");
+	}
+	else
+	{
+		LED.setMode(mode);
+		Config.defaultMode = mode;
+		Config.save();
+		this->server->send(200, "text/plain", "OK");
+	}
+}
+
+//---------------------------------------------------------------------------------------
+// handleGetMode
+//
+// Handles the /getmode request and returns the current default display mode.
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleGetMode()
+{
+	int mode = 0;
+	switch(Config.defaultMode)
+	{
+	case DisplayMode::plain:
+		mode = 0; break;
+	case DisplayMode::fade:
+		mode = 1; break;
+	case DisplayMode::flyingLettersVerticalUp:
+		mode = 2; break;
+	case DisplayMode::flyingLettersVerticalDown:
+		mode = 3; break;
+	default:
+		mode = 0; break;
+	}
+	this->server->send(200, "text/plain", String(mode));
 }
 
 //---------------------------------------------------------------------------------------
@@ -259,6 +384,42 @@ void WebServerClass::handleInfo()
 	json["flashsize"] = ESP.getFlashChipRealSize();
 	json["resetreason"] = ESP.getResetReason();
 	json["resetinfo"] = ESP.getResetInfo();
+//	switch(LED.getMode())
+//	{
+//	case DisplayMode::plain:
+//		json["mode"] = "plain"; break;
+//	case DisplayMode::fade:
+//		json["mode"] = "fade"; break;
+//	case DisplayMode::flyingLettersVertical:
+//		json["mode"] = "flyingLettersVertical"; break;
+//	case DisplayMode::matrix:
+//		json["mode"] = "matrix"; break;
+//	case DisplayMode::heart:
+//		json["mode"] = "heart"; break;
+//	case DisplayMode::stars:
+//		json["mode"] = "stars"; break;
+//	case DisplayMode::red:
+//		json["mode"] = "red"; break;
+//	case DisplayMode::green:
+//		json["mode"] = "green"; break;
+//	case DisplayMode::blue:
+//		json["mode"] = "blue"; break;
+//	case DisplayMode::yellowHourglass:
+//		json["mode"] = "yellowHourglass"; break;
+//	case DisplayMode::greenHourglass:
+//		json["mode"] = "greenHourglass"; break;
+//	case DisplayMode::update:
+//		json["mode"] = "update"; break;
+//	case DisplayMode::updateComplete:
+//		json["mode"] = "updateComplete"; break;
+//	case DisplayMode::updateError:
+//		json["mode"] = "updateError"; break;
+//	case DisplayMode::wifiManager:
+//		json["mode"] = "wifiManager"; break;
+//	default:
+//		json["mode"] = "unknown"; break;
+//	}
+
 	json.printTo(buf, sizeof(buf));
 	this->server->send(200, "application/json", buf);
 }
@@ -334,73 +495,32 @@ void WebServerClass::handleLoadConfig()
 }
 
 //---------------------------------------------------------------------------------------
-// handleMatrix
+// handleSetHeartbeat
 //
-// Sets or resets the showMatrix flag based on agrument "state"
-//
-// -> --
-// <- --
-//---------------------------------------------------------------------------------------
-void WebServerClass::handleMatrix()
-{
-	showMatrix = (this->server->hasArg("state") && this->server->arg("state") == "1");
-	this->server->send(200, "text/plain", "OK");
-}
-
-//---------------------------------------------------------------------------------------
-// handleHeartbeat
-//
-// Sets or resets the heartbeat flag in the configuration based on agrument "state"
+// Sets or resets the heartbeat flag in the configuration based on argument "state"
 //
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
-void WebServerClass::handleHeartbeat()
+void WebServerClass::handleSetHeartbeat()
 {
-	Config.heartbeat = (this->server->hasArg("state") && this->server->arg("state") == "1");
+	Config.heartbeat = (this->server->hasArg("value") && this->server->arg("value") == "1");
+	Config.save();
 	this->server->send(200, "text/plain", "OK");
 }
 
 //---------------------------------------------------------------------------------------
-// handleStars
+// handleGetHeartbeat
 //
-// Sets or resets the showStars flag based on agrument "state"
+// Returns the state of the heartbeat flag.
 //
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
-void WebServerClass::handleStars()
+void WebServerClass::handleGetHeartbeat()
 {
-	showStars = (this->server->hasArg("state") && this->server->arg("state") == "1");
-	this->server->send(200, "text/plain", "OK");
-}
-
-//---------------------------------------------------------------------------------------
-// handleHourglass
-//
-// Sets or resets the showHourglass flag based on agrument "state"
-//
-// ->
-// <- --
-//---------------------------------------------------------------------------------------
-void WebServerClass::handleHourglass()
-{
-	showHourglass = (this->server->hasArg("state") && this->server->arg("state") == "1");
-	this->server->send(200, "text/plain", "OK");
-}
-
-//---------------------------------------------------------------------------------------
-// handleHeart
-//
-// Sets or resets the showHeart flag based on agrument "state"
-//
-// -> --
-// <- --
-//---------------------------------------------------------------------------------------
-void WebServerClass::handleHeart()
-{
-	showHeart = (this->server->hasArg("state") && this->server->arg("state") == "1");
-	this->server->send(200, "text/plain", "OK");
+	if(Config.heartbeat) this->server->send(200, "text/plain", "1");
+	else this->server->send(200, "text/plain", "0");
 }
 
 //---------------------------------------------------------------------------------------
