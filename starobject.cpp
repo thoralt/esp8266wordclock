@@ -56,8 +56,8 @@ void StarObject::randomize(std::vector<StarObject> &allStars)
 		distanceOK = true;
 
 		// create new random pair
-		newX = random(LEDFunctionsClass::width + 1);
-		newY = random(LEDFunctionsClass::height + 1);
+		newX = random(LEDFunctionsClass::width);
+		newY = random(LEDFunctionsClass::height);
 		retryCount++;
 
 		// iterate over all other stars and check distance to newly generated coordinate
