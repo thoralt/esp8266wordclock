@@ -43,7 +43,7 @@
 int OTA_in_progress = 0;
 
 // WiFiServer telnetServer(23);
-// WiFiClient telnetClient; 
+// WiFiClient telnetClient;
 
 //---------------------------------------------------------------------------------------
 // Timer related variables
@@ -57,6 +57,7 @@ int s = 0;
 int ms = 0;
 int lastSecond = -1;
 bool timeVarLock = false;
+bool startup = true;
 
 int hourglassState = 0;
 int hourglassPrescaler = 0;
@@ -73,6 +74,7 @@ int updateCountdown = 25;
 //---------------------------------------------------------------------------------------
 void timerCallback()
 {
+	// update time variables
 	if (!timeVarLock)
 	{
 		timeVarLock = true;
@@ -86,31 +88,26 @@ void timerCallback()
 				if (++m > 59)
 				{
 					m = 0;
-					if (++h > 23)
-					{
-						h = 0;
-					}
+					if (++h > 23) h = 0;
 				}
 			}
 		}
 		timeVarLock = false;
 	}
 
-	if (ms == 0 && Config.heartbeat)
-		digitalWrite(2, LOW);
-	else
-		digitalWrite(2, HIGH);
+	// blink onboard LED if heartbeat is enabled
+	if (ms == 0 && Config.heartbeat) digitalWrite(2, LOW);
+	else digitalWrite(2, HIGH);
 
-	if (WebServer.showHourglass)
+	hourglassPrescaler += TIMER_RESOLUTION;
+	if (hourglassPrescaler >= HOURGLASS_ANIMATION_PERIOD)
 	{
-		hourglassPrescaler += TIMER_RESOLUTION;
-		if (hourglassPrescaler >= HOURGLASS_ANIMATION_PERIOD)
-		{
-			LED.hourglass(hourglassState, WebServer.showGreenHourglass);
-			hourglassPrescaler -= HOURGLASS_ANIMATION_PERIOD;
-			if (++hourglassState >= HOURGLASS_ANIMATION_FRAMES)
-				hourglassState = 0;
-		}
+		hourglassPrescaler -= HOURGLASS_ANIMATION_PERIOD;
+		if (++Config.hourglassState >= HOURGLASS_ANIMATION_FRAMES)
+			Config.hourglassState = 0;
+
+		// trigger LED processing for hourglass during startup
+		if(startup) LED.process();
 	}
 }
 
@@ -119,27 +116,12 @@ void timerCallback()
 //
 // ...
 //
-// -> 
+// ->
 // <- --
 //---------------------------------------------------------------------------------------
-void configModeCallback(WiFiManager *myWiFiManager) 
+void configModeCallback(WiFiManager *myWiFiManager)
 {
-	WebServer.showHourglass = false;
-	const uint8_t wifimanager[] = {
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-		0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
-		0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-		0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-		1, 1, 1, 1
-	};
-	palette_entry p[] = {{0, 0, 0}, {255, 255, 0}};
-	LED.set(wifimanager, p, true);
+	LED.setMode(DisplayMode::wifiManager);
 	Serial.println("Entered config mode");
 	Serial.println(WiFi.softAPIP());
 	Serial.println(myWiFiManager->getConfigPortalSSID());
@@ -159,8 +141,7 @@ void NtpCallback(uint8_t _h, uint8_t _m, uint8_t _s, uint8_t _ms)
 	Serial.println("NtpCallback()");
 
 	// wait if timer variable lock is set
-	while (timeVarLock)
-		delay(1);
+	while (timeVarLock) delay(1);
 
 	// lock timer variables to prevent changes during interrupt
 	timeVarLock = true;
@@ -201,7 +182,7 @@ void setup()
 	// LEDs
 	Serial.println("Starting LED module");
 	LED.begin(5);
-	WebServer.showHourglass = true;
+	LED.setMode(DisplayMode::yellowHourglass);
 
 	// WiFi
 	Serial.println("Initializing WiFi");
@@ -221,91 +202,25 @@ void setup()
 	//ArduinoOTA.setPassword((const char *)"123");
 	ArduinoOTA.onStart([]()
 	{
-		WebServer.showHourglass = false;
-
-		const uint8_t update[] = {
-			0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
-			0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-			1, 1, 1, 1
-		};
+		LED.setMode(DisplayMode::update);
+		Config.updateProgress = 0;
 		OTA_in_progress = 1;
 		Serial.println("OTA Start");
-		palette_entry p[] = {{0, 0, 0}, {255, 0, 0}};
-		LED.set(update, p, true);
 	});
 	ArduinoOTA.onEnd([]()
 	{
-		const uint8_t update_ok[] = {
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			1, 1, 1, 1
-		};
-		palette_entry p[] = {{0, 21, 0}, {0, 255, 0}};
-		LED.set(update_ok, p, true);
+		LED.setMode(DisplayMode::updateComplete);
 		Serial.println("\nOTA End");
 	});
 	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
 	{
-		uint8_t update[] = {
-			0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
-			0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-			1, 1, 1, 1
-		};
-		palette_entry p[] = {{0, 0, 0}, {255, 0, 0}, {42, 21, 0}, {255, 85, 0}};
-		int current_progress = progress * 110 / total;
-		for(int i=0; i<110; i++)
-		{
-			if(i<current_progress)
-			{
-				if(update[i] == 0) update[i] = 2;
-				else update[i] = 3;
-			}
-		}
-		LED.set(update, p, true);
-		Serial.printf("OTA Progress: %u%%\r", (progress / (total / 100)));
+		LED.setMode(DisplayMode::update);
+		Config.updateProgress = progress * 110 / total;
+		Serial.printf("OTA Progress: %u%%\r\n", (progress / (total / 100)));
 	});
 	ArduinoOTA.onError([](ota_error_t error)
 	{
-		const uint8_t update_err[] = {
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			1, 1, 1, 1
-		};
-		palette_entry p[] = {{0, 0, 0}, {255, 0, 0}};
-		LED.set(update_err, p, true);
-
+		LED.setMode(DisplayMode::updateError);
 		Serial.printf("OTA Error[%u]: ", error);
 		if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
 		else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
@@ -325,6 +240,8 @@ void setup()
 
 	// telnetServer.begin();
 	// telnetServer.setNoDelay(true);
+
+	startup = false;
 }
 
 //-----------------------------------------------------------------------------------
@@ -337,43 +254,46 @@ void loop()
 	// do OTA update stuff
 	ArduinoOTA.handle();
 
+	// update LEDs
+	LED.setBrightness(Brightness.value());
+	LED.setTime(h, m, s, ms);
+	LED.process();
+
 	// do not continue if OTA update is in progress
+	// OTA callbacks drive the LED display mode and OTA progress
+	// in the background, the above call to LED.process() ensures
+	// the OTA status is output to the LEDs
 	if (OTA_in_progress)
 		return;
 
+	// show the hourglass animation with green corners for the first 2.5 seconds
+	// after boot to be able to reflash with OTA during that time window if
+	// the firmware hangs afterwards
 	if(updateCountdown)
 	{
-		WebServer.showGreenHourglass = true;
+		LED.setMode(DisplayMode::greenHourglass);
 		Serial.print(".");
 		delay(100);
 		updateCountdown--;
+		if(updateCountdown == 0) LED.setMode(Config.defaultMode);
 		return;
 	}
 
-	WebServer.showGreenHourglass = false;
-	WebServer.showHourglass = false;
+	// set mode depending on current time
+	if(h == 22 && m == 00) LED.setMode(DisplayMode::heart);
+	else if(h == 13 && m == 37) LED.setMode(DisplayMode::matrix);
+	else if(h == 23 && m == 00) LED.setMode(DisplayMode::stars);
+	else LED.setMode(Config.defaultMode);
 
 	// do web server stuff
 	WebServer.process();
-
-	if (!WebServer.showHourglass)
-	{
-		LED.showHeart(WebServer.showHeart || (h == 22 && m == 00));
-		LED.showMatrix(WebServer.showMatrix || (h == 13 && m == 37));
-		LED.showStars(WebServer.showStars || (h == 23 && m == 00));
-		LED.displayTime(h, m, s, ms);
-		LED.setBrightness(Brightness.value());
-		LED.process();
-	}
 
 	// output current time if seconds value has changed
 	if (s != lastSecond)
 	{
 		lastSecond = s;
-		Serial.print(STRING2(h) + ":" + STRING2(m) + ":" + STRING2(s));
-		Serial.print(String(", ADC=") + Brightness.avg);
-		Serial.print(String(", heap=") + ESP.getFreeHeap());
-		Serial.println(String(", brightness=") + Brightness.value());
+		Serial.printf("%02i:%02i:%02i, ADC=%i, heap=%i, brightness=%i\r\n",
+				h, m, s, Brightness.avg, ESP.getFreeHeap(), Brightness.value());
 	}
 
 	if (Serial.available())
@@ -385,19 +305,13 @@ void loop()
 			Serial.println("WordClock ESP8266 ready.");
 			break;
 
-		case 'm':
-			WebServer.showMatrix = !WebServer.showMatrix;
-			break;
-
 		case 'X':
 			WiFi.disconnect();
 			ESP.reset();
 			break;
 
 		default:
-			Serial.print("Unknown command '");
-			Serial.print((char) incoming);
-			Serial.println("'");
+			Serial.printf("Unknown command '%c'\r\n", incoming);
 			break;
 		}
 	}
