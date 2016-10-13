@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=300">
@@ -43,6 +43,21 @@
 </div>
 
 <div class="outer_frame">
+    <p>Modus</p>
+	<select name="displaymode" id="displaymode" onchange="displayModeChanged()">
+		<option>Einfach</option>
+		<option>Weiche Übergänge</option>
+		<option>Fliegende Buchstaben aufwärts</option>
+		<option>Fliegende Buchstaben abwärts</option>
+	</select>
+</div>
+
+<div class="outer_frame">
+    <p>Optionen</p>
+	<label><input type="checkbox" name="heartbeat" id="heartbeat" onchange="heartbeatEnableChanged()">Heartbeat</label>
+</div>
+
+<div class="outer_frame">
     <p>Zeitserver</p>
     <input type="text" class="ntp_input" id="ntpserver" value="wird geladen..." onClick="this.setSelectionRange(0, this.value.length)">
     <div class="buttondiv">
@@ -73,7 +88,6 @@
 
 
 <script>
-
     var lastBackground = '';
     var newBackground = '';
     var lastForeground = '';
@@ -87,6 +101,44 @@
     var heartState = 0;
     var starsState = 0;
 
+	function heartbeatEnableChanged()
+	{
+		var enabled = 0;
+		var heartbeatCheckbox = document.getElementById("heartbeat");
+		if(heartbeatCheckbox.checked == true) enabled = 1;
+		
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://" + location.hostname + "/setheartbeat?value=" + enabled, true);
+        xhttp.send();
+	}
+	
+	function displayModeChanged()
+	{
+		var newMode;
+		var displayModeCombo = document.getElementById("displaymode");
+		switch(displayModeCombo.selectedIndex)
+		{
+			case 0: // plain
+				newMode = 0;
+				break;
+			case 1: // fade
+				newMode = 1;
+				break;
+			case 2: // flying letters vertical up
+				newMode = 2;
+				break;
+			case 3: // flying letters vertical down
+				newMode = 3;
+				break;
+			default:
+				newMode = 0;
+				break;
+		}
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://" + location.hostname + "/setmode?value=" + newMode, true);
+        xhttp.send();
+	}
+	
     function toggleMatrix()
     {
         if(matrixState == 0)
@@ -102,7 +154,7 @@
             document.getElementById('matrixbutton').style.background = '#000000';
         }
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://WordClock.local/matrix?state=" + matrixState, true);
+        xhttp.open("GET", "http://" + location.hostname + "/matrix?state=" + matrixState, true);
         xhttp.send();
     }
 
@@ -121,7 +173,7 @@
             document.getElementById('heartbutton').style.background = '#000000';
         }
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://WordClock.local/heart?state=" + heartState, true);
+        xhttp.open("GET", "http://" + location.hostname + "/heart?state=" + heartState, true);
         xhttp.send();
     }
 
@@ -140,7 +192,7 @@
             document.getElementById('starsbutton').style.background = '#000000';
         }
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://WordClock.local/stars?state=" + starsState, true);
+        xhttp.open("GET", "http://" + location.hostname + "/stars?state=" + starsState, true);
         xhttp.send();
     }
 
@@ -166,7 +218,7 @@
                 newSeconds = updateButton('secondsColorButton', 'Sekunden', c[6], c[7], c[8]);
             }
         };
-        xhttp.open("GET", "http://WordClock.local/getcolors", true);
+        xhttp.open("GET", "http://" + location.hostname + "/getcolors", true);
         xhttp.send();
     }
 
@@ -181,7 +233,7 @@
                 document.getElementById('ntpserver').value = xhttp.responseText;
             }
         };
-        xhttp.open("GET", "http://WordClock.local/getntpserver", true);
+        xhttp.open("GET", "http://" + location.hostname + "/getntpserver", true);
         xhttp.send();
     }
 
@@ -212,7 +264,7 @@
 
         if(update == true)
         {
-            var request = "http://WordClock.local/setcolor?" 
+            var request = "http://" + location.hostname + "/setcolor?" 
                 + "bg=" + newBackground 
                 + "&fg=" + newForeground 
                 + "&s=" + newSeconds;
@@ -227,7 +279,7 @@
     function saveConfig()
     {
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://WordClock.local/saveconfig", true);
+        xhttp.open("GET", "http://" + location.hostname + "/saveconfig", true);
         xhttp.send();
     }
 
@@ -255,14 +307,54 @@
         }
 
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://WordClock.local/setntpserver?ip=" + server, true);
+        xhttp.open("GET", "http://" + location.hostname + "/setntpserver?ip=" + server, true);
         xhttp.send();
     }
 
+	function loadMode()
+	{
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+            if(xhttp.readyState == 4 && xhttp.status == 200)
+            {
+                console.log("received " + xhttp.responseText);
+                document.getElementById('displaymode').selectedIndex = xhttp.responseText;
+            }
+        };
+        xhttp.open("GET", "http://" + location.hostname + "/getmode", true);
+        xhttp.send();
+	}
+	
+	function loadHeartbeat()
+	{
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+            if(xhttp.readyState == 4 && xhttp.status == 200)
+            {
+                console.log("received " + xhttp.responseText);
+				if(xhttp.responseText == "1")
+				{
+					document.getElementById('heartbeat').checked = true;
+				}
+				else
+				{
+					document.getElementById('heartbeat').checked = false;
+				}
+                
+            }
+        };
+        xhttp.open("GET", "http://" + location.hostname + "/getheartbeat", true);
+        xhttp.send();
+	}
+	
     function loadSettings()
     {
         loadColors();
         loadNtpServer();
+		loadMode();
+		loadHeartbeat();
     }
     
 </script>
