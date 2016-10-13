@@ -38,13 +38,17 @@ typedef struct _config_struct
 	palette_entry s;
 	uint8_t ntpserver[4];
 	bool heartbeat;
+	uint32_t mode;
 } config_struct;
 
 #define EEPROM_SIZE 512
 
 enum class DisplayMode
 {
-	plain, fade, flyingLettersVertical, matrix, heart, stars
+	plain, fade, flyingLettersVerticalUp, flyingLettersVerticalDown,
+	matrix, heart, stars, red, green, blue,
+	yellowHourglass, greenHourglass, update, updateComplete, updateError,
+	wifiManager, invalid
 };
 
 class ConfigClass
@@ -65,7 +69,10 @@ public:
 	IPAddress ntpserver = IPAddress(0, 0, 0, 0);
 	bool heartbeat = true;
 
-	DisplayMode mode = DisplayMode::flyingLettersVertical;
+	DisplayMode defaultMode = DisplayMode::flyingLettersVerticalUp;
+
+	int updateProgress = 0;
+	int hourglassState = 0;
 
 private:
 	// copy of EEPROM content
