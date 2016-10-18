@@ -30,6 +30,7 @@ public:
 	uint32_t value();
 
 	uint32_t avg = 0;
+	uint32_t brightnessOverride = 256;
 
 private:
 	uint32_t getBrightnessForADCValue(uint32_t adcValue);

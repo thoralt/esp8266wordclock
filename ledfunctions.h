@@ -39,6 +39,7 @@ typedef struct _xy_t
 
 #define NUM_MATRIX_OBJECTS 25
 #define NUM_STARS 10
+#define NUM_BRIGHTNESS_CURVES 2
 
 class LEDFunctionsClass
 {
@@ -48,12 +49,14 @@ public:
 	void begin(int pin);
 	void process();
 	void setTime(int h, int m, int s, int ms);
-	void setBrightness(uint8_t brightness);
+	void setBrightness(int brightness);
 	void setMode(DisplayMode newMode);
+	void show();
 
 	static int getOffset(int x, int y);
 	static const int width = 11;
 	static const int height = 10;
+	uint8_t currentValues[NUM_PIXELS * 3];
 
 private:
 	static const std::vector<leds_template_t> hoursTemplate;
@@ -65,7 +68,6 @@ private:
 	std::vector<xy_t> leavingLetters;
 	std::vector<MatrixObject> matrix;
 	std::vector<StarObject> stars;
-	uint8_t currentValues[NUM_PIXELS * 3];
 	uint8_t targetValues[NUM_PIXELS * 3];
 	Adafruit_NeoPixel *pixels = NULL;
 	int heartBrightness = 0;
@@ -79,7 +81,6 @@ private:
 	int lastH = -1;
 
 	void fillBackground(int seconds, int milliseconds, uint8_t *buf);
-	void show();
 	void renderRed();
 	void renderGreen();
 	void renderBlue();
@@ -103,9 +104,10 @@ private:
 	// project to the physical layout of the LEDs
 	static const uint32_t PROGMEM mapping[NUM_PIXELS];
 
-	static const uint32_t PROGMEM brightnessAdjustR[NUM_PIXELS];
-	static const uint32_t PROGMEM brightnessAdjustG[NUM_PIXELS];
-	static const uint32_t PROGMEM brightnessAdjustB[NUM_PIXELS];
+	static const uint32_t PROGMEM brightnessCurveSelect[NUM_PIXELS];
+	static const uint32_t PROGMEM brightnessCurvesR[256*NUM_BRIGHTNESS_CURVES];
+	static const uint32_t PROGMEM brightnessCurvesG[256*NUM_BRIGHTNESS_CURVES];
+	static const uint32_t PROGMEM brightnessCurvesB[256*NUM_BRIGHTNESS_CURVES];;
 };
 
 extern LEDFunctionsClass LED;

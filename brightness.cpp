@@ -65,10 +65,20 @@ uint32_t BrightnessClass::filter(uint16_t input)
 // Calculates a brightness value for a given ADC value using a table and interpolation.
 //
 // -> adcValue: input value [0...1023]
-// <- brightness [0...255]
+// <- brightness [0...256]
 //---------------------------------------------------------------------------------------
 uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 {
+//	float lightTable[] = {
+//		0, 15,
+//		59, 18,
+//		67, 32,
+//		155, 64,
+//		750, 128,
+//		1023, 160,
+//		-1, -1
+//	};
+
 	float lightTable[] = {
 		0, 160,
 		300, 96,
@@ -78,6 +88,11 @@ uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 		1023, 15,
 		-1, -1
 	};
+
+	if(this->brightnessOverride<256)
+	{
+		return this->brightnessOverride;
+	}
 
 	int i = 0;
 	float result;
