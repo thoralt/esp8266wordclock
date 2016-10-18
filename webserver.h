@@ -52,6 +52,9 @@ private:
 	void handleR();
 	void handleG();
 	void handleB();
+	void handleDebug();
+	void handleSetBrightness();
+	void handleGetADC();
 	void handleGetNtpServer();
 	void handleSetNtpServer();
 	void extractColor(String argName, palette_entry& result);

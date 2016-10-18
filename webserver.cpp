@@ -22,6 +22,7 @@
 #include <ArduinoJson.h>
 
 #include "ledfunctions.h"
+#include "brightness.h"
 #include "webserver.h"
 #include "ntp.h"
 
@@ -84,8 +85,11 @@ void WebServerClass::begin()
 	this->server->on("/r", std::bind(&WebServerClass::handleR, this));
 	this->server->on("/g", std::bind(&WebServerClass::handleG, this));
 	this->server->on("/b", std::bind(&WebServerClass::handleB, this));
+	this->server->on("/brightness", std::bind(&WebServerClass::handleSetBrightness, this));
+	this->server->on("/getadc", std::bind(&WebServerClass::handleGetADC, this));
 	this->server->on("/setmode", std::bind(&WebServerClass::handleSetMode, this));
 	this->server->on("/getmode", std::bind(&WebServerClass::handleGetMode, this));
+	this->server->on("/debug", std::bind(&WebServerClass::handleDebug, this));
 
 	this->server->onNotFound(std::bind(&WebServerClass::handleNotFound, this));
 	this->server->begin();
@@ -223,6 +227,61 @@ void WebServerClass::handleB()
 {
 	LED.setMode(DisplayMode::blue);
 	this->server->send(200, "text/plain", "OK");
+}
+
+void WebServerClass::handleSetBrightness()
+{
+	if(this->server->hasArg("value"))
+	{
+		Brightness.brightnessOverride = this->server->arg("value").toInt();
+		this->server->send(200, "text/plain", "OK");
+	}
+}
+
+void WebServerClass::handleDebug()
+{
+	if(this->server->hasArg("led") &&
+			   this->server->hasArg("r") &&
+			   this->server->hasArg("g") &&
+			   this->server->hasArg("b"))
+	{
+		int led = this->server->arg("led").toInt();
+		int r = this->server->arg("r").toInt();
+		int g = this->server->arg("g").toInt();
+		int b = this->server->arg("b").toInt();
+		if(led < 0) led = 0;
+		if(led >= NUM_PIXELS) led = NUM_PIXELS - 1;
+		if(r < 0) r = 0;
+		if(r > 255) r = 255;
+		if(g < 0) g = 0;
+		if(g > 255) g = 255;
+		if(b < 0) b = 0;
+		if(b > 255) b = 255;
+
+		LED.currentValues[led*3+0] = r;
+		LED.currentValues[led*3+1] = g;
+		LED.currentValues[led*3+2] = b;
+		LED.show();
+		Config.debugMode = 1;
+	}
+
+	if(this->server->hasArg("clear"))
+	{
+		for(int i=0; i<3*NUM_PIXELS; i++) LED.currentValues[i] = 0;
+		LED.show();
+	}
+
+	if(this->server->hasArg("end"))
+	{
+		Config.debugMode = 0;
+	}
+	this->server->send(200, "text/plain", "OK");
+}
+
+void WebServerClass::handleGetADC()
+{
+	int __attribute__ ((unused)) temp = Brightness.value(); // to trigger A/D conversion
+	this->server->send(200, "text/plain", String(Brightness.avg));
 }
 
 //---------------------------------------------------------------------------------------

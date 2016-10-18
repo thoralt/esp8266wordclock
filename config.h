@@ -68,6 +68,7 @@ public:
 	palette_entry s;
 	IPAddress ntpserver = IPAddress(0, 0, 0, 0);
 	bool heartbeat = true;
+	bool debugMode = false;
 
 	DisplayMode defaultMode = DisplayMode::flyingLettersVerticalUp;
 
