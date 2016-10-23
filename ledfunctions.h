@@ -25,6 +25,7 @@
 #include "config.h"
 #include "matrixobject.h"
 #include "starobject.h"
+#include "particle.h"
 
 typedef struct _leds_template_t
 {
@@ -64,6 +65,7 @@ private:
 
 	DisplayMode mode = DisplayMode::plain;
 
+	std::vector<Particle*> particles;
 	std::vector<xy_t> arrivingLetters;
 	std::vector<xy_t> leavingLetters;
 	std::vector<MatrixObject> matrix;
@@ -92,9 +94,11 @@ private:
 	void renderUpdateError();
 	void renderHourglass(uint8_t animationStep, bool green);
 	void renderWifiManager();
-	void renderTime(uint8_t *target);
+	void renderTime(uint8_t *target, int h, int m, int s, int ms);
 	void renderFlyingLetters();
 	void prepareFlyingLetters(uint8_t *source);
+	void renderExplosion();
+	void prepareExplosion(uint8_t *source);
 	void fade();
 	void set(const uint8_t *buf, palette_entry palette[]);
 	void set(const uint8_t *buf, palette_entry palette[], bool immediately);

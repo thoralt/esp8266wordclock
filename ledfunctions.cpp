@@ -325,6 +325,8 @@ void LEDFunctionsClass::process()
 		{Config.s.r,  Config.s.g,  Config.s.b}};
 	uint8_t buf[NUM_PIXELS];
 
+	this->mode = DisplayMode::explode;
+
 	switch(this->mode)
 	{
 	case DisplayMode::wifiManager:
@@ -358,6 +360,9 @@ void LEDFunctionsClass::process()
 	case DisplayMode::flyingLettersVerticalDown:
 		this->renderFlyingLetters();
 		break;
+	case DisplayMode::explode:
+		this->renderExplosion();
+		break;
 	case DisplayMode::matrix:
 		this->renderMatrix();
 		break;
@@ -368,13 +373,13 @@ void LEDFunctionsClass::process()
 		this->renderStars();
 		break;
 	case DisplayMode::fade:
-		this->renderTime(buf);
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
 		this->set(buf, palette, false);
 		this->fade();
 		break;
 	case DisplayMode::plain:
 	default:
-		this->renderTime(buf);
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
 		this->set(buf, palette, true);
 		break;
 	}
@@ -619,8 +624,8 @@ void LEDFunctionsClass::setMode(DisplayMode newMode)
 
 	if(animate)
 	{
-		this->renderTime(buf);
-		this->prepareFlyingLetters(buf);
+//		this->renderTime(buf);
+//		this->prepareFlyingLetters(buf);
 	}
 	this->process();
 }
@@ -635,13 +640,8 @@ void LEDFunctionsClass::setMode(DisplayMode newMode)
 //            filled with palette indexes representing the time
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::renderTime(uint8_t *target)
+void LEDFunctionsClass::renderTime(uint8_t *target, int h, int m, int s, int ms)
 {
-	int h = this->h;
-	int m = this->m;
-	int s = this->s;
-	int ms = this->ms;
-
 	this->fillBackground(s, ms, target);
 
 	// set static LEDs
@@ -823,6 +823,109 @@ void LEDFunctionsClass::renderHeart()
 }
 
 //---------------------------------------------------------------------------------------
+// prepareExplosion
+//
+// Sets the current buffer as target state for exploding letter
+//
+// -> source: buffer to read the currently active LEDs from
+// <- --
+//---------------------------------------------------------------------------------------
+void LEDFunctionsClass::prepareExplosion(uint8_t *source)
+{
+#define PARTICLE_COUNT 16
+#define PARTICLE_SPEED 0.15f
+
+	// add new particles based on given buffer
+	int ofs = 0;
+	int delay;
+	float vx, vy, angle;
+	float angle_increment = 2.0f * 3.141592654f / (float)(PARTICLE_COUNT);
+	Particle *p;
+
+	// iterate over every position in the screen buffer
+	for(int y=0; y<LEDFunctionsClass::height; y++)
+	{
+		for(int x=0; x<LEDFunctionsClass::width; x++)
+		{
+			// create entry in particles vector if current pixel is foreground
+			if(source[ofs++] == 1)
+			{
+				angle = 0;
+				delay = random(300);
+				for(int i=0; i<PARTICLE_COUNT; i++)
+				{
+					vx = PARTICLE_SPEED * sin(angle);
+					vy = PARTICLE_SPEED * cos(angle);
+					p = new Particle(x, y, vx, vy, delay);
+					this->particles.push_back(p);
+					angle += angle_increment;
+				}
+			}
+		}
+	}
+}
+
+//---------------------------------------------------------------------------------------
+// renderExplosion
+//
+// Eenders the exploding letters animation
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void LEDFunctionsClass::renderExplosion()
+{
+	uint8_t buf[NUM_PIXELS];
+	std::vector<Particle*> particlesToKeep;
+
+	// load palette colors from configuration
+	palette_entry palette[] = {
+		{Config.bg.r, Config.bg.g, Config.bg.b},
+		{Config.fg.r, Config.fg.g, Config.fg.b},
+		{Config.s.r,  Config.s.g,  Config.s.b}};
+
+	// check if the displayed time has changed
+	if((this->m/5 != this->lastM/5) || (this->h != this->lastH))
+	{
+		// prepare new animation with old time
+		this->renderTime(buf, this->lastH, this->lastM, 0, 0);
+		this->prepareExplosion(buf);
+	}
+
+	this->lastM = this->m;
+	this->lastH = this->h;
+
+	// create empty buffer filled with seconds color
+	this->fillBackground(this->s, this->ms, buf);
+
+	// minutes 1...4 for the corners
+	for(int i=0; i<=((this->lastM%5)-1); i++) buf[10 * 11 + i] = 1;
+
+	// Do we have something to explode?
+	if(this->particles.size() > 0)
+	{
+		// transfer background created by fillBackground to target values
+		this->set(buf, palette, true);
+
+		// iterate over all particles
+		for(Particle *p : this->particles)
+		{
+			p->render(this->currentValues, palette);
+			if(p->distance() < 15) particlesToKeep.push_back(p); else delete p;
+		}
+
+		this->particles.swap(particlesToKeep);
+	}
+	else
+	{
+		// present the current time with fading
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
+		this->fade();
+		this->set(buf, palette, false);
+	}
+}
+
+//---------------------------------------------------------------------------------------
 // prepareFlyingLetters
 //
 // Sets the current buffer as target state for flying letters, initializes current
@@ -921,7 +1024,7 @@ void LEDFunctionsClass::renderFlyingLetters()
 	if((this->m/5 != this->lastM/5) || (this->h != this->lastH))
 	{
 		// prepare new animation
-		this->renderTime(buf);
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
 		this->prepareFlyingLetters(buf);
 	}
 

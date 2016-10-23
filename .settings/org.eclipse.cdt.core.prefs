@@ -184,10 +184,10 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.DTS/value=3600
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/value=1476743419
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/value=1476951254
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/value=1476736219
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/value=1476944054
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/value=3600
@@ -205,7 +205,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWOR
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.AUTH/value=FALSE
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/value=8266
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/value=
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.PROGRAM.TOOL/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.PROGRAM.TOOL/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.PROGRAM.TOOL/value=${A.UPLOAD.TOOL}
