@@ -1,4 +1,4 @@
-   // ESP8266 Wordclock
+// ESP8266 Wordclock
 // Copyright (C) 2016 Thoralt Franz, https://github.com/thoralt
 //
 //  This module implements functions to manage the WS2812B LEDs. Two buffers contain
