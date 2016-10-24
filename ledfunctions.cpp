@@ -325,8 +325,6 @@ void LEDFunctionsClass::process()
 		{Config.s.r,  Config.s.g,  Config.s.b}};
 	uint8_t buf[NUM_PIXELS];
 
-	this->mode = DisplayMode::explode;
-
 	switch(this->mode)
 	{
 	case DisplayMode::wifiManager:
@@ -612,23 +610,27 @@ void LEDFunctionsClass::show()
 void LEDFunctionsClass::setMode(DisplayMode newMode)
 {
 	uint8_t buf[NUM_PIXELS];
-	bool animate = false;
+	DisplayMode previousMode = this->mode;
+	this->mode = newMode;
 
 	// if we changed to an animated letters mode, then start animation
 	// even if the current time did not yet change
-	if(newMode != this->mode &&
+	if(newMode != previousMode &&
 			(newMode == DisplayMode::flyingLettersVerticalUp ||
 			newMode == DisplayMode::flyingLettersVerticalDown))
 	{
-		animate = true;
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
+		this->prepareFlyingLetters(buf);
 	}
-	this->mode = newMode;
 
-	if(animate)
+	// if we changed to exploding letters mode, then start animation
+	// even if the current time did not yet change
+	if(newMode != previousMode && newMode == DisplayMode::explode)
 	{
-//		this->renderTime(buf);
-//		this->prepareFlyingLetters(buf);
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
+		this->prepareExplosion(buf);
 	}
+
 	this->process();
 }
 

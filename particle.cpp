@@ -82,10 +82,10 @@ float Particle::distance()
 // -> _x, _y: Point for distance test
 // <- --
 //---------------------------------------------------------------------------------------
-float Particle::distanceTo(float _x, float _y)
+float Particle::distanceTo(float x, float y)
 {
-	float dx = this->x - _x;
-	float dy = this->y - _y;
+	float dx = this->x - x;
+	float dy = this->y - y;
 	return sqrt(dx*dx + dy*dy);
 }
 
@@ -97,19 +97,23 @@ float Particle::distanceTo(float _x, float _y)
 // -> _x, _y: Point for distance test
 // <- --
 //---------------------------------------------------------------------------------------
-void Particle::move()
+float Particle::move()
 {
 	// do not move until given delay has expired
 	if(this->delay)
 	{
 		this->delay--;
-		return;
+		return 0;
 	}
 
 	this->x += this->vx;
 	this->y += this->vy;
 
-	if(this->distance() > MAX_PARTICLE_DISTANCE) this->alive = false;
+	// mark movement as finished if distance has reached maximum
+	float d = this->distance();
+	if(d > MAX_PARTICLE_DISTANCE) this->alive = false;
+
+	return d;
 }
 
 //---------------------------------------------------------------------------------------
@@ -123,29 +127,36 @@ void Particle::move()
 //---------------------------------------------------------------------------------------
 void Particle::render(uint8_t *target, palette_entry palette[])
 {
-	this->move();
+	// move particle and save traveled distance
+	int d = (int)this->move();
 
 	// check boundaries
 	if(this->x<0 || this->x >= LEDFunctionsClass::width) return;
 	if(this->y<0 || this->y >= LEDFunctionsClass::height) return;
 
-	int ofs = LEDFunctionsClass::getOffset(this->x, this->y);
-
-	int d = this->distance();
+	// limit distance
 	if(d >= MAX_PARTICLE_DISTANCE) d = MAX_PARTICLE_DISTANCE - 1;
 
+	// get palette color for foreground
 	float pr = (float)palette[1].r;
 	float pg = (float)palette[1].g;
 	float pb = (float)palette[1].b;
 
+	// calculate offset in buffer from given coordinates
+	int ofs = LEDFunctionsClass::getOffset(this->x, this->y);
+
+	// calculate fading color depending on distance from starting point and add it
+	// to the previous value of the pixel corresponding to the particle
 	float r = (float)target[ofs + 0] + pr * ParticleGradient[d];
 	float g = (float)target[ofs + 1] + pg * ParticleGradient[d];
 	float b = (float)target[ofs + 2] + pb * ParticleGradient[d];
 
+	// limit brightness value of each component to foreground color values
 	if(r > pr) r = pr;
 	if(g > pg) g = pg;
 	if(b > pb) b = pb;
 
+	// write back pixel color
 	target[ofs + 0] = r;
 	target[ofs + 1] = g;
 	target[ofs + 2] = b;

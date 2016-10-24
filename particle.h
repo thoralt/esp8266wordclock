@@ -28,13 +28,12 @@ class Particle
 {
 private:
 	static const float ParticleGradient[MAX_PARTICLE_DISTANCE];
-	float x0, y0;
+	float x, y, vx, vy, x0, y0;
 	int delay;
 
-	void move();
+	float move();
 
 public:
-	float x, y, vx, vy;
 	bool alive;
 
 	Particle(float x, float y, float vx, float vy, int delay);
