@@ -49,6 +49,8 @@
 		<option>Weiche Übergänge</option>
 		<option>Fliegende Buchstaben aufwärts</option>
 		<option>Fliegende Buchstaben abwärts</option>
+		<option>Explodierende Buchstaben</option>
+		<option>Zufällig</option>
 	</select>
 </div>
 
@@ -129,6 +131,12 @@
 				break;
 			case 3: // flying letters vertical down
 				newMode = 3;
+				break;
+			case 4: // exploding letters
+				newMode = 4;
+				break;
+			case 5: // random
+				newMode = 5;
 				break;
 			default:
 				newMode = 0;

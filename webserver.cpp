@@ -304,6 +304,7 @@ void WebServerClass::handleSetMode()
 		if(this->server->arg("value") == "1") mode = DisplayMode::fade;
 		if(this->server->arg("value") == "2") mode = DisplayMode::flyingLettersVerticalUp;
 		if(this->server->arg("value") == "3") mode = DisplayMode::flyingLettersVerticalDown;
+		if(this->server->arg("value") == "4") mode = DisplayMode::explode;
 	}
 
 	if(mode == DisplayMode::invalid)

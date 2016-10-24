@@ -46,7 +46,7 @@ typedef struct _config_struct
 enum class DisplayMode
 {
 	plain, fade, flyingLettersVerticalUp, flyingLettersVerticalDown, explode,
-	matrix, heart, stars, red, green, blue,
+	random, matrix, heart, stars, red, green, blue,
 	yellowHourglass, greenHourglass, update, updateComplete, updateError,
 	wifiManager, invalid
 };

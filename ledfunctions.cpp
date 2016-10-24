@@ -377,6 +377,8 @@ void LEDFunctionsClass::process()
 		this->set(buf, palette, false);
 		this->fade();
 		break;
+
+	case DisplayMode::random: // TODO: Implement random display mode
 	case DisplayMode::plain:
 	default:
 		this->renderTime(buf, this->h, this->m, this->s, this->ms);
@@ -911,7 +913,7 @@ void LEDFunctionsClass::renderExplosion()
 		for(Particle *p : this->particles)
 		{
 			p->render(this->currentValues, palette);
-			if(p->distance() < 15) particlesToKeep.push_back(p); else delete p;
+			if(p->alive) particlesToKeep.push_back(p); else delete p;
 		}
 
 		this->particles.swap(particlesToKeep);
