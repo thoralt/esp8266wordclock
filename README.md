@@ -12,6 +12,7 @@ This is my interpretation of the popular wordclock project. Key features:
 - integrated web server handles configuration interface for colors, time server etc.
 - automatic brightness using LDR 
 
+![front](https://github.com/thoralt/esp8266wordclock/blob/master/doc/exploding_letters.gif)
 ![front](https://github.com/thoralt/esp8266wordclock/blob/master/doc/IMG_5712.JPG)
 
 The clock is built into an [IKEA Ribba picture frame](http://www.ikea.com/de/de/catalog/products/00078051/) (€5), the front plate is screen printed to get fully opaque and sharp mask. The time is displayed using words with five minute resolution and the LEDs in the four corners display the minutes between the word changes. Seconds are visualized using the background slowly filling with an alternative color (configurable using the Web interface).
