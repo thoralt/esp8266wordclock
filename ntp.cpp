@@ -24,6 +24,7 @@
 // This code is based on (heavily modified):
 // https://github.com/sandeepmistry/esp8266-Arduino/blob/master/esp8266com/esp8266/libraries/ESP8266WiFi/examples/NTPClient
 #include <Arduino.h>
+#include <limits.h>
 #include "ntp.h"
 
 //---------------------------------------------------------------------------------------
@@ -103,16 +104,19 @@ IPAddress NtpClass::getServer()
 // upon success, repeats every 59 minutes
 //
 // -> ip: Address of an NTP server
-//	callback: Function to receive the current time (hours, minutes, seconds, ms)
-//	timezone: Hours difference from UTC (will be added to the received time, can be
-//			  negative)
+//	  callback: Function to receive the current time (hours, minutes, seconds, ms)
+//	  timezone: Hours difference from UTC (will be added to the received time, can be
+//			    negative)
+//    DST: if true, european daylight savings time is enabled and will be automatically
+//         adjusted depending on current date
 // <- --
 //---------------------------------------------------------------------------------------
-void NtpClass::begin(IPAddress ip, TNtpCallback callback, int timezone)
+void NtpClass::begin(IPAddress ip, TNtpCallback callback, int timezone, bool DST)
 {
 	this->_callback = callback;
 	this->timeServer = ip;
 	this->tz = timezone * 3600;
+	this->useDST = DST;
 
 	this->udp.begin(LOCAL_PORT);
 
@@ -178,6 +182,78 @@ void NtpClass::tickerFunction()
 }
 
 //---------------------------------------------------------------------------------------
+// dayOfWeek
+//
+// Calculates the weekday for a given date.
+//
+// -> y, m, d: year, month, day to calculate the weekday for
+// <- weekday (0=Sunday, 1=Monday, ...)
+//---------------------------------------------------------------------------------------
+int NtpClass::dayOfWeek(int y, int m, int d)
+{
+	static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+	y -= m < 3;
+	return (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
+}
+
+//---------------------------------------------------------------------------------------
+// lastSunday
+//
+// Calculates the last Sunday for a given year and month.
+//
+// -> year, month: ...
+//    lastDayInMonth: number of days in given month (out of laziness, should be done
+//                    inside the method)
+// <- weekday (0=Sunday, 1=Monday, ...)
+//---------------------------------------------------------------------------------------
+int NtpClass::lastSunday(int year, int month, int lastDayInMonth)
+{
+	for(int day = lastDayInMonth; day > 0; day--)
+	{
+		if(this->dayOfWeek(year, month, day) == 0) return day;
+	}
+	return 0;
+}
+
+//---------------------------------------------------------------------------------------
+// isDSTactive
+//
+// Checks if daylight saving time is currently in effect using the internal member
+// variables for year, month, day and hour.
+//
+// -> --
+// <- true if DST is active
+//---------------------------------------------------------------------------------------
+bool NtpClass::isDSTactive()
+{
+	// active in April ... September
+	if(this->month > 3 && this->month < 10) return true;
+
+	int lastSundayInMarch = this->lastSunday(this->year, 3, 31);
+	int lastSundayInOctober = this->lastSunday(this->year, 10, 31);
+
+	if(this->month == 3)
+	{
+		// active after last Sunday in March
+		if(this->day > lastSundayInMarch) return true;
+
+		// active on last Sunday in March after 02:00
+		if(this->day == lastSundayInMarch && this->h >= 2) return true;
+	}
+
+	if(this->month == 10)
+	{
+		// active before last Sunday in October
+		if(this->day < lastSundayInOctober) return true;
+
+		// active on last Sunday in October before 03:00
+		if(this->day == lastSundayInMarch && this->h < 3) return true;
+	}
+
+	return false;
+}
+
+//---------------------------------------------------------------------------------------
 // parse
 //
 // Reads the received UDP packet and decodes the current time, stores result in (this)
@@ -188,6 +264,8 @@ void NtpClass::tickerFunction()
 void NtpClass::parse()
 {
 	byte buf[NTP_PACKET_SIZE];
+	bool DST = false;
+
 	Serial.print("NtpClass::parse() (");
 	Serial.print(this->timer);
 
@@ -195,17 +273,25 @@ void NtpClass::parse()
 	this->udp.flush(); // discard additional data
 	unsigned long highWord = word(buf[40], buf[41]);
 	unsigned long lowWord = word(buf[42], buf[43]);
-	unsigned long secsSince1900 = highWord << 16 | lowWord;
-	const unsigned long seventyYears = 2208988800UL;
-	unsigned long epoch = secsSince1900 - seventyYears + this->tz;
-	randomSeed(epoch);
+	unsigned long secsSince1970 = (highWord << 16 | lowWord) - 2208988800ULL;
 
-	this->h = (epoch % 86400L) / 3600;
-	this->m = (epoch % 3600) / 60;
-	this->s = (epoch % 60);
-	this->ms = 0;
+	// calculate date and time from timestamp
+	this->decodeTime(secsSince1970 + this->tz);
+	randomSeed(secsSince1970);
 
-	Serial.printf("ms), local time: %02i:%02i:%02i\r\n", h, m, s);
+	// check if we need to adjust for daylight savings time
+	if(this->useDST)
+	{
+		// check if we are inside DST window
+		DST = this->isDSTactive();
+		if(DST)
+		{
+			// decode date/time again using DST offset
+			this->decodeTime(secsSince1970 + this->tz + 3600);
+		}
+	}
+	Serial.printf("ms), local time: %02i:%02i:%02i, date: %i-%02i-%02i, "
+			"weekday=%i, DST=%i\r\n", h, m, s, year, month, day, weekday, DST);
 }
 
 //---------------------------------------------------------------------------------------
@@ -235,4 +321,78 @@ void NtpClass::sendPacket()
 	this->udp.endPacket();
 
 	this->timer = 0;
+}
+
+
+// modified/borrowed from http://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c?h=v0.9.15
+
+/* 2000-03-01 (mod 400 year, immediately after feb29 */
+#define LEAPOCH (946684800LL + 86400*(31+29))
+#define DAYS_PER_400Y (365*400 + 97)
+#define DAYS_PER_100Y (365*100 + 24)
+#define DAYS_PER_4Y   (365*4   + 1)
+void NtpClass::decodeTime(long long t)
+{
+	long long days, secs;
+	int remdays, remsecs, remyears;
+	int qc_cycles, c_cycles, q_cycles;
+	int years, months;
+	int wday, yday, leap;
+	static const char days_in_month[] = {31,30,31,30,31,31,30,31,30,31,31,29};
+
+	secs = t - LEAPOCH;
+	days = secs / 86400;
+	remsecs = secs % 86400;
+	if(remsecs < 0)
+	{
+		remsecs += 86400;
+		days--;
+	}
+
+	wday = (3+days)%7;
+	if (wday < 0) wday += 7;
+
+	qc_cycles = days / DAYS_PER_400Y;
+	remdays = days % DAYS_PER_400Y;
+	if(remdays < 0)
+	{
+		remdays += DAYS_PER_400Y;
+		qc_cycles--;
+	}
+
+	c_cycles = remdays / DAYS_PER_100Y;
+	if(c_cycles == 4) c_cycles--;
+	remdays -= c_cycles * DAYS_PER_100Y;
+
+	q_cycles = remdays / DAYS_PER_4Y;
+	if(q_cycles == 25) q_cycles--;
+	remdays -= q_cycles * DAYS_PER_4Y;
+
+	remyears = remdays / 365;
+	if(remyears == 4) remyears--;
+	remdays -= remyears * 365;
+
+	leap = !remyears && (q_cycles || !c_cycles);
+	yday = remdays + 31 + 28 + leap;
+	if(yday >= 365+leap) yday -= 365+leap;
+
+	years = remyears + 4*q_cycles + 100*c_cycles + 400*qc_cycles;
+
+	for(months=0; days_in_month[months] <= remdays; months++)
+		remdays -= days_in_month[months];
+
+	this->year = years + 2000;
+	this->month = months + 3;
+	if(this->month >= 12)
+	{
+		this->month -=12;
+		this->year++;
+	}
+	this->day = remdays + 1;
+	this->weekday = wday;
+	this->yearday = yday;
+
+	this->h = remsecs / 3600;
+	this->m = remsecs / 60 % 60;
+	this->s = remsecs % 60;
 }

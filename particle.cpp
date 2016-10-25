@@ -79,7 +79,7 @@ float Particle::distance()
 //
 // Calculates the distance to a given point
 //
-// -> _x, _y: Point for distance test
+// -> x, y: Point for distance test
 // <- --
 //---------------------------------------------------------------------------------------
 float Particle::distanceTo(float x, float y)
@@ -94,8 +94,8 @@ float Particle::distanceTo(float x, float y)
 //
 // Moves the particle according to the current speed.
 //
-// -> _x, _y: Point for distance test
-// <- --
+// -> --
+// <- distance to starting point
 //---------------------------------------------------------------------------------------
 float Particle::move()
 {

@@ -33,7 +33,7 @@ class NtpClass
 public:
 	// public methods
 	NtpClass();
-	void begin(IPAddress ip, TNtpCallback callback, int timezone);
+	void begin(IPAddress ip, TNtpCallback callback, int timezone, bool DST);
 	void setServer(IPAddress address);
 	IPAddress getServer();
 
@@ -46,8 +46,12 @@ private:
 		idle, startRequest, waitingForReply, waitingForReload
 	};
 
+	int lastSunday(int year, int month, int lastDayInMonth);
 	static void tickerFunctionWrapper(NtpClass *obj);
+	int dayOfWeek(int y, int m, int d);
+	void decodeTime(long long t);
 	void tickerFunction();
+	bool isDSTactive();
 	void sendPacket();
 	void parse();
 
@@ -60,8 +64,14 @@ private:
 	int h = 0;
 	int m = 0;
 	int s = 0;
+	int year = 0;
+	int month = 0;
+	int day = 0;
+	int weekday = 0;
+	int yearday = 0;
 	int ms = 0;
 	int tz = 0;
+	bool useDST = false;
 };
 
 extern NtpClass NTP;

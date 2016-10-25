@@ -21,6 +21,10 @@
 #include "ledfunctions.h"
 
 //---------------------------------------------------------------------------------------
+#if 1 // variables
+//---------------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------------
 // global instance
 //---------------------------------------------------------------------------------------
 LEDFunctionsClass LED = LEDFunctionsClass();
@@ -250,6 +254,12 @@ const uint32_t PROGMEM LEDFunctionsClass::brightnessCurvesB[256*NUM_BRIGHTNESS_C
 
 #endif
 
+#endif
+
+//---------------------------------------------------------------------------------------
+#if 1 // getters, setters, data flow
+//---------------------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------------------
 // ~LEDFunctionsClass
 //
@@ -403,23 +413,6 @@ void LEDFunctionsClass::setBrightness(int brightness)
 }
 
 //---------------------------------------------------------------------------------------
-// fillBackground
-//
-// Initializes the buffer with either background (=0) or seconds progress (=2),
-// part of the background will be illuminated with color 2 depending on current
-// seconds/milliseconds value, whole screen is backlit when seconds = 59
-//
-// -> seconds, milliseconds: Time value which the fill process will base on
-//    buf: destination buffer
-// <- --
-//---------------------------------------------------------------------------------------
-void LEDFunctionsClass::fillBackground(int seconds, int milliseconds, uint8_t *buf)
-{
-	int pos = (((seconds * 1000 + milliseconds) * 110) / 60000) + 1;
-	for (int i = 0; i < NUM_PIXELS; i++) buf[i] = (i < pos) ? 2 : 0;
-}
-
-//---------------------------------------------------------------------------------------
 // setTime
 //
 // Sets the time which will be used to drive the LED matrix. The internal time is _not_
@@ -434,6 +427,42 @@ void LEDFunctionsClass::setTime(int h, int m, int s, int ms)
 	this->m = m;
 	this->s = s;
 	this->ms = ms;
+}
+
+//---------------------------------------------------------------------------------------
+// setMode
+//
+// Sets the display mode to one of the members of the DisplayMode enum and thus changes
+// what will be shown on the display during the next calls of LEDFunctionsClass.process()
+//
+// -> newMode: mode to be set
+// <- --
+//---------------------------------------------------------------------------------------
+void LEDFunctionsClass::setMode(DisplayMode newMode)
+{
+	uint8_t buf[NUM_PIXELS];
+	DisplayMode previousMode = this->mode;
+	this->mode = newMode;
+
+	// if we changed to an animated letters mode, then start animation
+	// even if the current time did not yet change
+	if(newMode != previousMode &&
+			(newMode == DisplayMode::flyingLettersVerticalUp ||
+			newMode == DisplayMode::flyingLettersVerticalDown))
+	{
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
+		this->prepareFlyingLetters(buf);
+	}
+
+	// if we changed to exploding letters mode, then start animation
+	// even if the current time did not yet change
+	if(newMode != previousMode && newMode == DisplayMode::explode)
+	{
+		this->renderTime(buf, this->h, this->m, this->s, this->ms);
+		this->prepareExplosion(buf);
+	}
+
+	this->process();
 }
 
 //---------------------------------------------------------------------------------------
@@ -476,28 +505,6 @@ void LEDFunctionsClass::set(const uint8_t *buf, palette_entry palette[],
 	if (immediately)
 	{
 		this->setBuffer(this->currentValues, buf, palette);
-	}
-}
-
-//---------------------------------------------------------------------------------------
-// getOffset
-//
-// Calculates the offset of a given RGB triplet inside the LED buffer.
-// Does range checking for x and y, uses the internal mapping table.
-//
-// -> x: x coordinate
-//    y: y coordinate
-// <- offset for given coordinates
-//---------------------------------------------------------------------------------------
-int LEDFunctionsClass::getOffset(int x, int y)
-{
-	if (x>=0 && y>=0 && x<LEDFunctionsClass::width && y<LEDFunctionsClass::height)
-	{
-		return LEDFunctionsClass::mapping[x + y*LEDFunctionsClass::width] * 3;
-	}
-	else
-	{
-		return 0;
 	}
 }
 
@@ -599,40 +606,49 @@ void LEDFunctionsClass::show()
 }
 
 //---------------------------------------------------------------------------------------
-// setMode
+// getOffset
 //
-// Sets the display mode to one of the members of the DisplayMode enum and thus changes
-// what will be shown on the display during the next calls of LEDFunctionsClass.process()
+// Calculates the offset of a given RGB triplet inside the LED buffer.
+// Does range checking for x and y, uses the internal mapping table.
 //
-// -> newMode: mode to be set
+// -> x: x coordinate
+//    y: y coordinate
+// <- offset for given coordinates
+//---------------------------------------------------------------------------------------
+int LEDFunctionsClass::getOffset(int x, int y)
+{
+	if (x>=0 && y>=0 && x<LEDFunctionsClass::width && y<LEDFunctionsClass::height)
+	{
+		return LEDFunctionsClass::mapping[x + y*LEDFunctionsClass::width] * 3;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+//---------------------------------------------------------------------------------------
+// fillBackground
+//
+// Initializes the buffer with either background (=0) or seconds progress (=2),
+// part of the background will be illuminated with color 2 depending on current
+// seconds/milliseconds value, whole screen is backlit when seconds = 59
+//
+// -> seconds, milliseconds: Time value which the fill process will base on
+//    buf: destination buffer
 // <- --
 //---------------------------------------------------------------------------------------
-void LEDFunctionsClass::setMode(DisplayMode newMode)
+void LEDFunctionsClass::fillBackground(int seconds, int milliseconds, uint8_t *buf)
 {
-	uint8_t buf[NUM_PIXELS];
-	DisplayMode previousMode = this->mode;
-	this->mode = newMode;
-
-	// if we changed to an animated letters mode, then start animation
-	// even if the current time did not yet change
-	if(newMode != previousMode &&
-			(newMode == DisplayMode::flyingLettersVerticalUp ||
-			newMode == DisplayMode::flyingLettersVerticalDown))
-	{
-		this->renderTime(buf, this->h, this->m, this->s, this->ms);
-		this->prepareFlyingLetters(buf);
-	}
-
-	// if we changed to exploding letters mode, then start animation
-	// even if the current time did not yet change
-	if(newMode != previousMode && newMode == DisplayMode::explode)
-	{
-		this->renderTime(buf, this->h, this->m, this->s, this->ms);
-		this->prepareExplosion(buf);
-	}
-
-	this->process();
+	int pos = (((seconds * 1000 + milliseconds) * 110) / 60000) + 1;
+	for (int i = 0; i < NUM_PIXELS; i++) buf[i] = (i < pos) ? 2 : 0;
 }
+
+#endif
+
+//---------------------------------------------------------------------------------------
+#if 1 // rendering methods
+//---------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------
 // renderTime
@@ -829,7 +845,8 @@ void LEDFunctionsClass::renderHeart()
 //---------------------------------------------------------------------------------------
 // prepareExplosion
 //
-// Sets the current buffer as target state for exploding letter
+// Prepare particles based on current screen state
+//
 //
 // -> source: buffer to read the currently active LEDs from
 // <- --
@@ -839,12 +856,13 @@ void LEDFunctionsClass::prepareExplosion(uint8_t *source)
 #define PARTICLE_COUNT 16
 #define PARTICLE_SPEED 0.15f
 
-	// add new particles based on given buffer
-	int ofs = 0;
-	int delay;
 	float vx, vy, angle;
-	float angle_increment = 2.0f * 3.141592654f / (float)(PARTICLE_COUNT);
+	int ofs = 0;
 	Particle *p;
+	int delay;
+
+	// compute angle increment
+	float angle_increment = 2.0f * 3.141592654f / (float)(PARTICLE_COUNT);
 
 	// iterate over every position in the screen buffer
 	for(int y=0; y<LEDFunctionsClass::height; y++)
@@ -854,12 +872,21 @@ void LEDFunctionsClass::prepareExplosion(uint8_t *source)
 			// create entry in particles vector if current pixel is foreground
 			if(source[ofs++] == 1)
 			{
-				angle = 0;
+				// add a random delay of zero to approx. 3 seconds to each
+				// explosion
 				delay = random(300);
+
+				// start with angle of zero radians, assign velocity vector
+				// placed on a circle to each particle
+				angle = 0;
 				for(int i=0; i<PARTICLE_COUNT; i++)
 				{
+					// calculate particle speed vector based on angle and
+					// absolute speed value
 					vx = PARTICLE_SPEED * sin(angle);
 					vy = PARTICLE_SPEED * cos(angle);
+
+					// create new particle and add it to particles list
 					p = new Particle(x, y, vx, vy, delay);
 					this->particles.push_back(p);
 					angle += angle_increment;
@@ -872,15 +899,15 @@ void LEDFunctionsClass::prepareExplosion(uint8_t *source)
 //---------------------------------------------------------------------------------------
 // renderExplosion
 //
-// Eenders the exploding letters animation
+// Renders the exploding letters animation
 //
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
 void LEDFunctionsClass::renderExplosion()
 {
-	uint8_t buf[NUM_PIXELS];
 	std::vector<Particle*> particlesToKeep;
+	uint8_t buf[NUM_PIXELS];
 
 	// load palette colors from configuration
 	palette_entry palette[] = {
@@ -903,29 +930,34 @@ void LEDFunctionsClass::renderExplosion()
 	this->fillBackground(this->s, this->ms, buf);
 
 	// minutes 1...4 for the corners
-	for(int i=0; i<=((this->lastM%5)-1); i++) buf[10 * 11 + i] = 1;
+	for(int i=0; i<=((this->m%5)-1); i++) buf[10 * 11 + i] = 1;
 
 	// Do we have something to explode?
 	if(this->particles.size() > 0)
 	{
-		// transfer background created by fillBackground to target values
+		// transfer background created by fillBackground to target buffer
 		this->set(buf, palette, true);
 
 		// iterate over all particles
 		for(Particle *p : this->particles)
 		{
+			// move and render current particle
 			p->render(this->currentValues, palette);
+
+			// if particle is still active, keep it; kill it otherwise
 			if(p->alive) particlesToKeep.push_back(p); else delete p;
 		}
 
+		// only keep active particles, discard the rest
+		// -> use particlesToKeep as new list
 		this->particles.swap(particlesToKeep);
 	}
 	else
 	{
-		// present the current time with fading
+		// present the current time in boring mode with simple fading
 		this->renderTime(buf, this->h, this->m, this->s, this->ms);
-		this->fade();
 		this->set(buf, palette, false);
+		this->fade();
 	}
 }
 
@@ -1040,7 +1072,7 @@ void LEDFunctionsClass::renderFlyingLetters()
 	this->fillBackground(this->s, this->ms, buf);
 
 	// minutes 1...4 for the corners
-	for(int i=0; i<=((this->lastM%5)-1); i++) buf[10 * 11 + i] = 1;
+	for(int i=0; i<=((this->m%5)-1); i++) buf[10 * 11 + i] = 1;
 
 	// leaving letters animation has priority
 	if(this->leavingLetters.size() > 0)
@@ -1314,3 +1346,5 @@ void LEDFunctionsClass::renderWifiManager()
 	palette_entry p[] = {{0, 0, 0}, {255, 255, 0}};
 	this->set(wifimanager, p, true);
 }
+
+#endif

@@ -37,13 +37,13 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_FREQ/value=40
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/value=eagle.flash.1m128.ld
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/value=eagle.flash.4m.ld
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_MODE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_MODE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_MODE/value=dio
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_SIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_SIZE/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_SIZE/value=1M
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_SIZE/value=4M
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.F_CPU/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.F_CPU/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.F_CPU/value=80000000L
@@ -64,16 +64,16 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.PROJECT_NAME/value=${ProjName}
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_BLOCKSIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_BLOCKSIZE/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_BLOCKSIZE/value=4096
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_BLOCKSIZE/value=8192
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_END/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_END/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_END/value=0xFB000
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_END/value=0x3FB000
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_PAGESIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_PAGESIZE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_PAGESIZE/value=256
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/value=0xDB000
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/value=0x100000
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SYSTEM.PATH/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SYSTEM.PATH/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SYSTEM.PATH/value=${A.RUNTIME.PLATFORM.PATH}/system
@@ -184,10 +184,10 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.DTS/value=3600
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/value=1476951254
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/value=1477386373
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/value=1476944054
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/value=1477379173
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/value=3600
@@ -200,12 +200,6 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.JANTJE
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NAME/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NAME/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NAME/value=Generic ESP8266 Module
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.AUTH/delimiter=;
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.AUTH/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.AUTH/value=FALSE
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/delimiter=;
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.NETWORK.PORT/value=
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.PROGRAM.TOOL/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.PROGRAM.TOOL/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.PROGRAM.TOOL/value=${A.UPLOAD.TOOL}
@@ -370,7 +364,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SERIAL
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SERIAL.PORT.FILE/value=${A.SERIAL.PORT} 
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SERIAL.PORT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SERIAL.PORT/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SERIAL.PORT/value=wordclock.local
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SERIAL.PORT/value=${JANTJE.COM_PORT}
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SOFTWARE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SOFTWARE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.SOFTWARE/value=baeyens
@@ -388,7 +382,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.CMD/value=esptool.exe
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK.PASSWORD/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK.PASSWORD/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK.PASSWORD/value=${A.NETWORK.AUTH}
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK.PASSWORD/value=${A.TOOLS.ESPTOOL.NETWORK.AUTH}
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK_CMD/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK_CMD/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.NETWORK_CMD/value=python.exe
@@ -397,7 +391,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.PATH/value=${A.RUNTIME.TOOLS.ESPTOOL.PATH}
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.NETWORK_PATTERN/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.NETWORK_PATTERN/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.NETWORK_PATTERN/value="${A.TOOLS.ESPTOOL.NETWORK_CMD}" "${A.RUNTIME.PLATFORM.PATH}/tools/espota.py" -i "${A.SERIAL.PORT}" -p "${A.NETWORK.PORT}" "--auth\=${A.TOOLS.ESPTOOL.NETWORK.PASSWORD}" -f "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.bin"
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.NETWORK_PATTERN/value="${A.TOOLS.ESPTOOL.NETWORK_CMD}" "${A.RUNTIME.PLATFORM.PATH}/tools/espota.py" -i "${A.SERIAL.PORT}" -p "${A.TOOLS.ESPTOOL.NETWORK.PORT}" "--auth\=${A.TOOLS.ESPTOOL.NETWORK.PASSWORD}" -f "${A.BUILD.PATH}/${A.BUILD.PROJECT_NAME}.bin"
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.PARAMS.QUIET/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.PARAMS.QUIET/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.ESPTOOL.UPLOAD.PARAMS.QUIET/value=
@@ -416,15 +410,12 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.MKSPIFFS.PATH/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.MKSPIFFS.PATH/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.TOOLS.MKSPIFFS.PATH/value=${A.RUNTIME.TOOLS.MKSPIFFS.PATH}
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.FORCE_RESET_BEFORE_UPLOAD/delimiter=;
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.FORCE_RESET_BEFORE_UPLOAD/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.FORCE_RESET_BEFORE_UPLOAD/value=FALSE
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_DATA_SIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_DATA_SIZE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_DATA_SIZE/value=81920
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_SIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_SIZE/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_SIZE/value=892912
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.MAXIMUM_SIZE/value=1044464
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.RESETMETHOD/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.RESETMETHOD/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.RESETMETHOD/value=nodemcu
@@ -437,9 +428,6 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.WAIT_FOR_UPLOAD_PORT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.WAIT_FOR_UPLOAD_PORT/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD.WAIT_FOR_UPLOAD_PORT/value=true
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD_CLASS.TOOL/delimiter=;
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD_CLASS.TOOL/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.UPLOAD_CLASS.TOOL/value=arduinoUploader
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.VERSION/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.VERSION/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.VERSION/value=2.2.0
@@ -457,7 +445,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.B
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.BOARD_NAME/value=Generic ESP8266 Module
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/value=wordclock.local at 192.168.178.65 (ESP8266_ESP01)null 8266
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/value=COM9
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.CPU\ FREQUENCY/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.CPU\ FREQUENCY/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.CPU\ FREQUENCY/value=80 MHz
@@ -484,7 +472,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.F
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ MODE/value=DIO
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/value=1M (128K SPIFFS)
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/value=4M (3M SPIFFS)
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.LWIP\ VARIANT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.LWIP\ VARIANT/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.LWIP\ VARIANT/value=
@@ -520,7 +508,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.U
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD\ SPEED/value=921600
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PATTERN/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PATTERN/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PATTERN/value=${A.TOOLS.ESP8266OTA.UPLOAD.PATTERN}
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PATTERN/value=${A.TOOLS.ESPTOOL.UPLOAD.PATTERN}
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PROTOCOL/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PROTOCOL/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.UPLOAD.PROTOCOL/value=Default

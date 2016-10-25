@@ -232,7 +232,7 @@ void setup()
 
 	// NTP
 	Serial.println("Starting NTP module");
-	NTP.begin(Config.ntpserver, NtpCallback, 2);
+	NTP.begin(Config.ntpserver, NtpCallback, 1, true);
 
 	// web server
 	Serial.println("Starting HTTP server");
