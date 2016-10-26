@@ -89,6 +89,8 @@ void WebServerClass::begin()
 	this->server->on("/getadc", std::bind(&WebServerClass::handleGetADC, this));
 	this->server->on("/setmode", std::bind(&WebServerClass::handleSetMode, this));
 	this->server->on("/getmode", std::bind(&WebServerClass::handleGetMode, this));
+	this->server->on("/settimezone", std::bind(&WebServerClass::handleSetTimeZone, this));
+	this->server->on("/gettimezone", std::bind(&WebServerClass::handleGetTimeZone, this));
 	this->server->on("/debug", std::bind(&WebServerClass::handleDebug, this));
 
 	this->server->onNotFound(std::bind(&WebServerClass::handleNotFound, this));
@@ -282,6 +284,41 @@ void WebServerClass::handleGetADC()
 {
 	int __attribute__ ((unused)) temp = Brightness.value(); // to trigger A/D conversion
 	this->server->send(200, "text/plain", String(Brightness.avg));
+}
+
+//---------------------------------------------------------------------------------------
+// handleSetTimeZone
+//
+//
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleSetTimeZone()
+{
+	if(this->server->hasArg("value"))
+	{
+		int newTimeZone = this->server->arg("value").toInt();
+		if(newTimeZone < - 12) newTimeZone = -12;
+		if(newTimeZone > 14) newTimeZone = 14;
+		Config.timeZone = newTimeZone;
+		Config.save();
+		NTP.setTimeZone(Config.timeZone);
+	}
+	this->server->send(200, "text/plain", "OK");
+}
+
+//---------------------------------------------------------------------------------------
+// handleGetTimeZone
+//
+//
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void WebServerClass::handleGetTimeZone()
+{
+	this->server->send(200, "text/plain", String(Config.timeZone));
 }
 
 //---------------------------------------------------------------------------------------

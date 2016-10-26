@@ -55,6 +55,39 @@
 </div>
 
 <div class="outer_frame">
+    <p>Modus</p>
+	<select name="timezone" id="timezone" onchange="timeZoneChanged()">
+		<option>UTC-12:00</option>
+		<option>UTC-11:00</option>
+		<option>UTC-10:00</option>
+		<option>UTC-09:00</option>
+		<option>UTC-08:00</option>
+		<option>UTC-07:00</option>
+		<option>UTC-06:00</option>
+		<option>UTC-05:00</option>
+		<option>UTC-04:00</option>
+		<option>UTC-03:00</option>
+		<option>UTC-02:00</option>
+		<option>UTC-01:00</option>
+		<option>UTC+00:00</option>
+		<option>UTC+01:00</option>
+		<option>UTC+02:00</option>
+		<option>UTC+03:00</option>
+		<option>UTC+04:00</option>
+		<option>UTC+05:00</option>
+		<option>UTC+06:00</option>
+		<option>UTC+07:00</option>
+		<option>UTC+08:00</option>
+		<option>UTC+09:00</option>
+		<option>UTC+10:00</option>
+		<option>UTC+11:00</option>
+		<option>UTC+12:00</option>
+		<option>UTC+13:00</option>
+		<option>UTC+14:00</option>
+	</select>
+</div>
+
+<div class="outer_frame">
     <p>Optionen</p>
 	<label><input type="checkbox" name="heartbeat" id="heartbeat" onchange="heartbeatEnableChanged()">Heartbeat</label>
 </div>
@@ -67,28 +100,6 @@
     </div>
 </div>
 
-<div class="outer_frame">
-    <p>Test</p>
-    <div class="buttondiv">
-    <button id="matrixbutton" class="colorbutton" style="color:#00FF00;background:#000000;" onclick="toggleMatrix()">
-        Bildschirmschoner Matrix
-    </button>
-    </div>
-
-    <div class="buttondiv">
-    <button id="heartbutton" class="colorbutton" style="color:#FF0000;background:#000000;" onclick="toggleHeart()">
-        Bildschirmschoner Herz
-    </button>
-    </div>
-
-    <div class="buttondiv">
-    <button id="starsbutton" class="colorbutton" style="color:#FFFFFF;background:#000000;" onclick="toggleStars()">
-        Bildschirmschoner Sterne
-    </button>
-    </div>
-</div>
-
-
 <script>
     var lastBackground = '';
     var newBackground = '';
@@ -98,10 +109,6 @@
     var newSeconds = '';
 
     var timer = setTimeout(sendColorTimer, 250);
-
-    var matrixState = 0;
-    var heartState = 0;
-    var starsState = 0;
 
 	function heartbeatEnableChanged()
 	{
@@ -147,63 +154,75 @@
         xhttp.send();
 	}
 	
-    function toggleMatrix()
-    {
-        if(matrixState == 0)
-        {
-            matrixState = 1;
-            document.getElementById('matrixbutton').style.color = '#000000';
-            document.getElementById('matrixbutton').style.background = '#00FF00';
-        }
-        else
-        {
-            matrixState = 0;
-            document.getElementById('matrixbutton').style.color = '#00FF00';
-            document.getElementById('matrixbutton').style.background = '#000000';
-        }
+	function timeZoneChanged()
+	{
+		var newTimeZone;
+		var timeZoneCombo = document.getElementById("timezone");
+		switch(timeZoneCombo.selectedIndex)
+		{
+			case 0:
+				newTimeZone = -12; break;
+			case 1:
+				newTimeZone = -11; break;
+			case 2:
+				newTimeZone = -10; break;
+			case 3:
+				newTimeZone = -9; break;
+			case 4:
+				newTimeZone = -8; break;
+			case 5:
+				newTimeZone = -7; break;
+			case 6:
+				newTimeZone = -6; break;
+			case 7:
+				newTimeZone = -5; break;
+			case 8:
+				newTimeZone = -4; break;
+			case 9:
+				newTimeZone = -3; break;
+			case 10:
+				newTimeZone = -2; break;
+			case 11:
+				newTimeZone = -1; break;
+			case 12:
+				newTimeZone = 0; break;
+			case 13:
+				newTimeZone = 1; break;
+			case 14:
+				newTimeZone = 2; break;
+			case 15:
+				newTimeZone = 3; break;
+			case 16:
+				newTimeZone = 4; break;
+			case 17:
+				newTimeZone = 5; break;
+			case 18:
+				newTimeZone = 6; break;
+			case 19:
+				newTimeZone = 7; break;
+			case 20:
+				newTimeZone = 8; break;
+			case 21:
+				newTimeZone = 9; break;
+			case 22:
+				newTimeZone = 10; break;
+			case 23:
+				newTimeZone = 11; break;
+			case 24:
+				newTimeZone = 12; break;
+			case 25:
+				newTimeZone = 13; break;
+			case 26:
+				newTimeZone = 14; break;
+			default:
+				newTimeZone = 0;
+				break;
+		}
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://" + location.hostname + "/matrix?state=" + matrixState, true);
+        xhttp.open("GET", "http://" + location.hostname + "/settimezone?value=" + newTimeZone, true);
         xhttp.send();
-    }
-
-    function toggleHeart()
-    {
-        if(heartState == 0)
-        {
-            heartState = 1;
-            document.getElementById('heartbutton').style.color = '#000000';
-            document.getElementById('heartbutton').style.background = '#FF0000';
-        }
-        else
-        {
-            heartState = 0;
-            document.getElementById('heartbutton').style.color = '#FF0000';
-            document.getElementById('heartbutton').style.background = '#000000';
-        }
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://" + location.hostname + "/heart?state=" + heartState, true);
-        xhttp.send();
-    }
-
-    function toggleStars()
-    {
-        if(starsState == 0)
-        {
-            starsState = 1;
-            document.getElementById('starsbutton').style.color = '#000000';
-            document.getElementById('starsbutton').style.background = '#FFFFFF';
-        }
-        else
-        {
-            starsState = 0;
-            document.getElementById('starsbutton').style.color = '#FFFFFF';
-            document.getElementById('starsbutton').style.background = '#000000';
-        }
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://" + location.hostname + "/stars?state=" + starsState, true);
-        xhttp.send();
-    }
-
+	}
+	
     function updateButton(id, text, r, g, b)
     {
         button = document.getElementById(id);
@@ -319,6 +338,21 @@
         xhttp.send();
     }
 
+	function loadTimeZone()
+	{
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+            if(xhttp.readyState == 4 && xhttp.status == 200)
+            {
+                console.log("received " + xhttp.responseText);
+                document.getElementById('timezone').selectedIndex = parseInt(xhttp.responseText) + 12;
+            }
+        };
+        xhttp.open("GET", "http://" + location.hostname + "/gettimezone", true);
+        xhttp.send();
+	}
+	
 	function loadMode()
 	{
         var xhttp = new XMLHttpRequest();
@@ -363,6 +397,7 @@
         loadNtpServer();
 		loadMode();
 		loadHeartbeat();
+		loadTimeZone();
     }
     
 </script>

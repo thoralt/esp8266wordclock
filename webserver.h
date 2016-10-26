@@ -42,6 +42,8 @@ private:
 	void handleGetColors();
 	void handleSetColor();
 	void handleNotFound();
+	void handleSetTimeZone();
+	void handleGetTimeZone();
 	void handleSetMode();
 	void handleGetMode();
 	void handleSetHeartbeat();

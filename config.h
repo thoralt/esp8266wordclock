@@ -39,6 +39,7 @@ typedef struct _config_struct
 	uint8_t ntpserver[4];
 	bool heartbeat;
 	uint32_t mode;
+	uint32_t timeZone;
 } config_struct;
 
 #define EEPROM_SIZE 512
@@ -74,6 +75,7 @@ public:
 
 	int updateProgress = 0;
 	int hourglassState = 0;
+	int timeZone = 0;
 
 private:
 	// copy of EEPROM content

@@ -37,13 +37,20 @@
 #include "webserver.h"
 #include "config.h"
 
+#define DEBUG(...) Serial.printf(__VA_ARGS__); if(telnetClient.connected()) telnetClient.printf(__VA_ARGS__);
+
+#define LED_RED		15
+#define LED_GREEN	12
+#define LED_BLUE	13
+#define LED_BUILTIN	2
+
 //---------------------------------------------------------------------------------------
 // Network related variables
 //---------------------------------------------------------------------------------------
 int OTA_in_progress = 0;
 
-// WiFiServer telnetServer(23);
-// WiFiClient telnetClient;
+WiFiServer telnetServer(23);
+WiFiClient telnetClient;
 
 //---------------------------------------------------------------------------------------
 // Timer related variables
@@ -96,8 +103,8 @@ void timerCallback()
 	}
 
 	// blink onboard LED if heartbeat is enabled
-	if (ms == 0 && Config.heartbeat) digitalWrite(2, LOW);
-	else digitalWrite(2, HIGH);
+	if (ms == 0 && Config.heartbeat) digitalWrite(LED_BUILTIN, LOW);
+	else digitalWrite(LED_BUILTIN, HIGH);
 
 	hourglassPrescaler += TIMER_RESOLUTION;
 	if (hourglassPrescaler >= HOURGLASS_ANIMATION_PERIOD)
@@ -152,6 +159,13 @@ void NtpCallback(uint8_t _h, uint8_t _m, uint8_t _s, uint8_t _ms)
 	timeVarLock = false;
 }
 
+void setLED(unsigned char r, unsigned char g, unsigned char b)
+{
+	digitalWrite(LED_RED, r);
+	digitalWrite(LED_GREEN, g);
+	digitalWrite(LED_BLUE, b);
+}
+
 //---------------------------------------------------------------------------------------
 // setup
 //
@@ -163,7 +177,12 @@ void NtpCallback(uint8_t _h, uint8_t _m, uint8_t _s, uint8_t _ms)
 void setup()
 {
 	// ESP8266 LED
-	pinMode(2, OUTPUT);
+	pinMode(LED_BUILTIN, OUTPUT);
+	pinMode(LED_RED, OUTPUT);
+	pinMode(LED_GREEN, OUTPUT);
+	pinMode(LED_BLUE, OUTPUT);
+
+	setLED(1, 0, 0);
 
 	// serial port
 	Serial.begin(115200);
@@ -194,6 +213,8 @@ void setup()
 		delay(1000);
 		ESP.reset();
 	}
+
+	setLED(0, 0, 1);
 
 	// OTA update
 	Serial.println("Initializing OTA");
@@ -238,8 +259,8 @@ void setup()
 	Serial.println("Starting HTTP server");
 	WebServer.begin();
 
-	// telnetServer.begin();
-	// telnetServer.setNoDelay(true);
+	telnetServer.begin();
+	telnetServer.setNoDelay(true);
 
 	startup = false;
 }
@@ -271,11 +292,16 @@ void loop()
 	// the firmware hangs afterwards
 	if(updateCountdown)
 	{
+		setLED(0, 1, 0);
 		LED.setMode(DisplayMode::greenHourglass);
 		Serial.print(".");
 		delay(100);
 		updateCountdown--;
-		if(updateCountdown == 0) LED.setMode(Config.defaultMode);
+		if(updateCountdown == 0)
+		{
+			LED.setMode(Config.defaultMode);
+			setLED(0, 0, 0);
+		}
 		return;
 	}
 
@@ -292,8 +318,8 @@ void loop()
 	if (s != lastSecond)
 	{
 		lastSecond = s;
-		Serial.printf("%02i:%02i:%02i, ADC=%i, heap=%i, brightness=%i\r\n",
-				h, m, s, Brightness.avg, ESP.getFreeHeap(), Brightness.value());
+		DEBUG("%02i:%02i:%02i, ADC=%i, heap=%i, brightness=%i\r\n",
+			  h, m, s, Brightness.avg, ESP.getFreeHeap(), Brightness.value());
 	}
 
 	if (Serial.available())
@@ -316,16 +342,15 @@ void loop()
 		}
 	}
 
-	// if (telnetServer.hasClient())
-	// {
-	// if(telnetClient.connected())
-	// {
-	// telnetClient.stop();
-	// }
-	// telnetClient = telnetServer.available();
-	// telnetClient.println("WordClock telnet server ready.");
-	// }
-
+	if (telnetServer.hasClient())
+	{
+		if(telnetClient.connected())
+		{
+			telnetClient.stop();
+		}
+		telnetClient = telnetServer.available();
+		telnetClient.println("WordClock telnet server ready.");
+	}
 }
 // ./esptool.py --port /dev/tty.usbserial --baud 460800 write_flash --flash_size=8m 0 /var/folders/yh/bv744591099f3x24xbkc22zw0000gn/T/build006b1a55228a1b90dda210fcddb62452.tmp/test.ino.bin
 // FlashSize 1M (128k SPIFFS)

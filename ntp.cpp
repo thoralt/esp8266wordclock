@@ -323,6 +323,11 @@ void NtpClass::sendPacket()
 	this->timer = 0;
 }
 
+void NtpClass::setTimeZone(int timeZone)
+{
+	this->tz = timeZone * 3600;
+	this->timer = NTP_RELOAD_INTERVAL - 1000;
+}
 
 // modified/borrowed from http://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c?h=v0.9.15
 

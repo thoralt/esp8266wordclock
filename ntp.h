@@ -36,6 +36,7 @@ public:
 	void begin(IPAddress ip, TNtpCallback callback, int timezone, bool DST);
 	void setServer(IPAddress address);
 	IPAddress getServer();
+	void setTimeZone(int timeZone);
 
 	// public members
 	bool syncInProgress = false;
