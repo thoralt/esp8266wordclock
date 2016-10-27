@@ -323,15 +323,35 @@ void NtpClass::sendPacket()
 	this->timer = 0;
 }
 
+//---------------------------------------------------------------------------------------
+// setTimeZone
+//
+// Sets the time zone and triggers a new NTP request which in turn will trigger the
+// callback to notify the callee of the new time using the new time zone setting.
+//
+// -> timeZone: New time zone offset to UTC in hours
+// <- --
+//---------------------------------------------------------------------------------------
 void NtpClass::setTimeZone(int timeZone)
 {
 	this->tz = timeZone * 3600;
 	this->timer = NTP_RELOAD_INTERVAL - 1000;
 }
 
-// modified/borrowed from http://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c?h=v0.9.15
-
-/* 2000-03-01 (mod 400 year, immediately after feb29 */
+//---------------------------------------------------------------------------------------
+// decodeTime
+//
+// Decodes a Unix timestamp (seconds since 1970) to the internal date and time values.
+// Results are placed in this->year, this->month, this->day, this->weekday,
+// this->yearday, this->hour, this->minute and this->second.
+//
+// modified/borrowed from:
+//   http://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c?h=v0.9.15
+//
+// -> t: Unix timestamp (seconds since 1970)
+// <- --
+//---------------------------------------------------------------------------------------
+// 2000-03-01 (mod 400 year, immediately after feb29)
 #define LEAPOCH (946684800LL + 86400*(31+29))
 #define DAYS_PER_400Y (365*400 + 97)
 #define DAYS_PER_100Y (365*100 + 24)
@@ -396,7 +416,6 @@ void NtpClass::decodeTime(long long t)
 	this->day = remdays + 1;
 	this->weekday = wday;
 	this->yearday = yday;
-
 	this->h = remsecs / 3600;
 	this->m = remsecs / 60 % 60;
 	this->s = remsecs % 60;

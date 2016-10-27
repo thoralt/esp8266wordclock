@@ -289,29 +289,35 @@ void WebServerClass::handleGetADC()
 //---------------------------------------------------------------------------------------
 // handleSetTimeZone
 //
-//
+// Handles the /settimezone request. Saves the time zone
 //
 // -> --
 // <- --
 //---------------------------------------------------------------------------------------
 void WebServerClass::handleSetTimeZone()
 {
+	int newTimeZone = -999;
 	if(this->server->hasArg("value"))
 	{
-		int newTimeZone = this->server->arg("value").toInt();
-		if(newTimeZone < - 12) newTimeZone = -12;
-		if(newTimeZone > 14) newTimeZone = 14;
-		Config.timeZone = newTimeZone;
-		Config.save();
-		NTP.setTimeZone(Config.timeZone);
+		newTimeZone = this->server->arg("value").toInt();
+		if(newTimeZone < - 12 || newTimeZone > 14)
+		{
+			this->server->send(400, "text/plain", "ERR");
+		}
+		else
+		{
+			Config.timeZone = newTimeZone;
+			Config.save();
+			NTP.setTimeZone(Config.timeZone);
+			this->server->send(200, "text/plain", "OK");
+		}
 	}
-	this->server->send(200, "text/plain", "OK");
 }
 
 //---------------------------------------------------------------------------------------
 // handleGetTimeZone
 //
-//
+// Handles the /gettimezone request, delivers offset to UTC in hours.
 //
 // -> --
 // <- --
