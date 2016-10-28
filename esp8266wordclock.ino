@@ -190,6 +190,13 @@ void setup()
 	Serial.println();
 	Serial.println("ESP8266 WordClock setup() begin");
 
+	Serial.print("ESP.getResetReason(): ");
+	Serial.println(ESP.getResetReason());
+	Serial.print("ESP.getResetInfo(): ");
+	Serial.println(ESP.getResetInfo());
+
+	system_set_os_print(0);
+
 	// timer
 	Serial.println("Starting timer");
 	timer.attach(TIMER_RESOLUTION / 1000.0, timerCallback);
@@ -319,7 +326,7 @@ void loop()
 	{
 		lastSecond = s;
 		DEBUG("%02i:%02i:%02i, ADC=%i, heap=%i, brightness=%i\r\n",
-			  h, m, s, Brightness.avg, ESP.getFreeHeap(), Brightness.value());
+			  h, m, s, (int)Brightness.avg, ESP.getFreeHeap(), Brightness.value());
 	}
 
 	if (Serial.available())

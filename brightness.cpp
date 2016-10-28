@@ -42,21 +42,32 @@ BrightnessClass::BrightnessClass()
 //---------------------------------------------------------------------------------------
 // filter
 //
-// Exponential moving average filter using integer arithmetics. Implements the
-// following behaviour:
+// Exponential moving average filter, implements the following behaviour:
 //
-//   output = (1-coeff)*last_output + coeff*input
+//   output = (1-coeff)*last_output + coeff*input with coeff = 0.01
 //
-// FILTER_COEFFICIENT is defined as fixed point number with 16.16 bits resolution.
-//
-// -> input: filter input [0...65535]
+// -> input: filter input
 // <- --
 //---------------------------------------------------------------------------------------
-uint32_t BrightnessClass::filter(uint16_t input)
+float BrightnessClass::filter(float input)
 {
-	uint32_t tmp = (65536 - FILTER_COEFFICIENT) * this->avg
-			     + FILTER_COEFFICIENT * (uint32_t)input;
-	return (tmp + 32768) >> 16;
+#define COEFF 0.01f
+	return (1.0f - COEFF) * this->avg + (COEFF * input);
+
+//	float result = (1.0f - COEFF) * this->avg + (COEFF * input);
+//	Serial.print("BrightnessClass::filter(input="); Serial.print(input, 3);
+//	Serial.print("): this->avg="); Serial.print(this->avg, 3);
+//	Serial.print(", result="); Serial.print(result, 3); Serial.print("\r\n");
+//	return result;
+
+//#define ALPHA(x) ((uint16_t)(x * 65535.0f))
+//#define FILTER_COEFFICIENT ALPHA(0.01)
+//	uint32_t tmp = (65536 - FILTER_COEFFICIENT) * this->avg
+//			     + FILTER_COEFFICIENT * (uint32_t)input;
+//	uint32_t result = (tmp + 32768) >> 16;
+//	Serial.printf("BrightnessClass::filter(input=%d): this->avg=%d, tmp=%d, result=%d\r\n",
+//			input, this->avg, tmp, result);
+//	return (tmp + 32768) >> 16;
 }
 
 //---------------------------------------------------------------------------------------
