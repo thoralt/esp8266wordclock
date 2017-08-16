@@ -62,8 +62,11 @@ public:
 private:
 	static const std::vector<leds_template_t> hoursTemplate;
 	static const std::vector<leds_template_t> minutesTemplate;
+	static const palette_entry firePalette[];
+	static const palette_entry plasmaPalette[];
 
 	DisplayMode mode = DisplayMode::plain;
+
 
 	std::vector<Particle*> particles;
 	std::vector<xy_t> arrivingLetters;
@@ -88,6 +91,8 @@ private:
 	void renderBlue();
 	void renderMatrix();
 	void renderHeart();
+	void renderFire();
+	void renderPlasma();
 	void renderStars();
 	void renderUpdate();
 	void renderUpdateComplete();

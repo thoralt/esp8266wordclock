@@ -85,8 +85,9 @@ uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 //		59, 18,
 //		67, 32,
 //		155, 64,
-//		750, 128,
-//		1023, 160,
+//		600, 128,
+//		800, 256,
+//		1024, 256,
 //		-1, -1
 //	};
 
@@ -106,8 +107,6 @@ uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 	}
 
 	int i = 0;
-	float result;
-	float value = adcValue;
 	while (lightTable[i] != -1)
 	{
 		if (adcValue >= lightTable[i] && adcValue < lightTable[i + 2])
@@ -116,7 +115,7 @@ uint32_t BrightnessClass::getBrightnessForADCValue(uint32_t adcValue)
 			float y1 = lightTable[i + 1];
 			float x2 = lightTable[i + 2];
 			float y2 = lightTable[i + 3];
-			result = y1 + (value - x1) * (y2 - y1) / (x2 - x1);
+			float result = y1 + ((float)adcValue - x1) * (y2 - y1) / (x2 - x1);
 			return (int) result;
 		}
 		i += 2;

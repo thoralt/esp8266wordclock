@@ -37,7 +37,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_FREQ/value=40
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/value=eagle.flash.4m.ld
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_LD/value=eagle.flash.4m1m.ld
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_MODE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_MODE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.FLASH_MODE/value=dio
@@ -73,7 +73,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_PAGESIZE/value=256
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/value=0x100000
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SPIFFS_START/value=0x300000
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SYSTEM.PATH/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SYSTEM.PATH/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.BUILD.SYSTEM.PATH/value=${A.RUNTIME.PLATFORM.PATH}/system
@@ -184,10 +184,10 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.DTS/value=3600
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/value=1477649477
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.LOCAL/value=1502794353
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/value=1477642277
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.UTC/value=1502787153
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/A.EXTRA.TIME.ZONE/value=3600
@@ -445,7 +445,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.B
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.BOARD_NAME/value=Generic ESP8266 Module
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/value=COM9
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.COM_PORT/value=COM8
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.CPU\ FREQUENCY/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.CPU\ FREQUENCY/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.CPU\ FREQUENCY/value=80 MHz
@@ -472,7 +472,7 @@ environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.F
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ MODE/value=DIO
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/operation=replace
-environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/value=4M (3M SPIFFS)
+environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.FLASH\ SIZE/value=4M (1M SPIFFS)
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.LWIP\ VARIANT/delimiter=;
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.LWIP\ VARIANT/operation=replace
 environment/project/it.baeyens.arduino.core.toolChain.release.108900914/JANTJE.LWIP\ VARIANT/value=

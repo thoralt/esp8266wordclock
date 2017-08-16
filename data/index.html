@@ -36,10 +36,6 @@
         wird geladen...
     </button>
     </div>
-
-    <div class="buttondiv" style="margin-top:25px;">
-    <button class="colorbutton" onclick="saveConfig()">speichern</button>
-    </div>
 </div>
 
 <div class="outer_frame">
@@ -301,13 +297,6 @@
         }
 
         timer = setTimeout(sendColorTimer, 250);
-    }
-
-    function saveConfig()
-    {
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://" + location.hostname + "/saveconfig", true);
-        xhttp.send();
     }
 
     function isValidIP(ip)

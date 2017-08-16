@@ -70,6 +70,20 @@ void ConfigClass::begin()
 }
 
 //---------------------------------------------------------------------------------------
+// saveDelayed
+//
+// Copies the current class member values to EEPROM buffer and writes it to the EEPROM
+// after 10 seconds.
+//
+// -> --
+// <- --
+//---------------------------------------------------------------------------------------
+void ConfigClass::saveDelayed()
+{
+	this->delayedWriteTimer = 1000; // 10 seconds using 10 ms timer
+}
+
+//---------------------------------------------------------------------------------------
 // save
 //
 // Copies the current class member values to EEPROM buffer and writes it to the EEPROM.
@@ -79,6 +93,8 @@ void ConfigClass::begin()
 //---------------------------------------------------------------------------------------
 void ConfigClass::save()
 {
+	this->delayedWriteFlag = false;
+
 	this->config->bg = this->bg;
 	this->config->fg = this->fg;
 	this->config->s = this->s;
@@ -119,7 +135,7 @@ void ConfigClass::reset()
 	this->config->heartbeat = true;
 	this->heartbeat = this->config->heartbeat;
 
-	this->defaultMode = DisplayMode::plain;
+	this->defaultMode = DisplayMode::explode;
 	this->config->mode = (uint32_t) this->defaultMode;
 	this->timeZone = 0;
 

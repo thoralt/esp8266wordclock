@@ -36,8 +36,9 @@
 #include "ntp.h"
 #include "webserver.h"
 #include "config.h"
+#include "osapi.h"
 
-#define DEBUG(...) Serial.printf(__VA_ARGS__); if(telnetClient.connected()) telnetClient.printf(__VA_ARGS__);
+#define DEBUG(...) Serial.printf(__VA_ARGS__);
 
 #define LED_RED		15
 #define LED_GREEN	12
@@ -48,9 +49,6 @@
 // Network related variables
 //---------------------------------------------------------------------------------------
 int OTA_in_progress = 0;
-
-WiFiServer telnetServer(23);
-WiFiClient telnetClient;
 
 //---------------------------------------------------------------------------------------
 // Timer related variables
@@ -100,6 +98,13 @@ void timerCallback()
 			}
 		}
 		timeVarLock = false;
+	}
+
+	// decrement delayed EEPROM config timer
+	if(Config.delayedWriteTimer)
+	{
+		Config.delayedWriteTimer--;
+		if(Config.delayedWriteTimer == 0) Config.delayedWriteFlag = true;
 	}
 
 	// blink onboard LED if heartbeat is enabled
@@ -204,6 +209,8 @@ void setup()
 	// configuration
 	Serial.println("Loading configuration");
 	Config.begin();
+//	Config.reset();
+//	Config.save();
 
 	// LEDs
 	Serial.println("Starting LED module");
@@ -220,13 +227,24 @@ void setup()
 		delay(1000);
 		ESP.reset();
 	}
+/*	WiFi.mode(WIFI_STA);
+	WiFi.begin("Funkturm", "*******");
+	while (WiFi.status() != WL_CONNECTED)
+	{
+		delay(500);
+		Serial.print(".");
+	}
+	Serial.println("");*/
+	Serial.println("WiFi connected");
+	Serial.println("IP address: ");
+	Serial.println(WiFi.localIP());
 
 	setLED(0, 0, 1);
 
 	// OTA update
 	Serial.println("Initializing OTA");
 	ArduinoOTA.setPort(8266);
-	ArduinoOTA.setHostname("WordClock");
+	ArduinoOTA.setHostname("WordClock" );
 	//ArduinoOTA.setPassword((const char *)"123");
 	ArduinoOTA.onStart([]()
 	{
@@ -266,10 +284,11 @@ void setup()
 	Serial.println("Starting HTTP server");
 	WebServer.begin();
 
-	telnetServer.begin();
-	telnetServer.setNoDelay(true);
+//	telnetServer.begin();
+//	telnetServer.setNoDelay(true);
 
 	startup = false;
+	Serial.println("Startup complete.");
 }
 
 //-----------------------------------------------------------------------------------
@@ -313,20 +332,32 @@ void loop()
 	}
 
 	// set mode depending on current time
-	if(h == 22 && m == 00) LED.setMode(DisplayMode::heart);
-	else if(h == 13 && m == 37) LED.setMode(DisplayMode::matrix);
+	if(h == 13 && m == 37) LED.setMode(DisplayMode::matrix);
+	else if(h == 19 && m == 00) LED.setMode(DisplayMode::matrix);
+	else if(h == 20 && m == 00) LED.setMode(DisplayMode::plasma);
+	else if(h == 21 && m == 00) LED.setMode(DisplayMode::fire);
+	else if(h == 22 && m == 00) LED.setMode(DisplayMode::heart);
 	else if(h == 23 && m == 00) LED.setMode(DisplayMode::stars);
 	else LED.setMode(Config.defaultMode);
 
 	// do web server stuff
 	WebServer.process();
 
+	// save configuration to EEPROM if necessary
+	if(Config.delayedWriteFlag)
+	{
+		DEBUG("Config timer expired, writing configuration.\r\n");
+		Config.delayedWriteFlag = false;
+		Config.save();
+	}
+
 	// output current time if seconds value has changed
 	if (s != lastSecond)
 	{
 		lastSecond = s;
-		DEBUG("%02i:%02i:%02i, ADC=%i, heap=%i, brightness=%i\r\n",
-			  h, m, s, (int)Brightness.avg, ESP.getFreeHeap(), Brightness.value());
+		DEBUG("%02i:%02i:%02i, filtered ADC=%i.%02i, heap=%i, brightness=%i\r\n",
+			  h, m, s, (int)Brightness.avg, (int)(Brightness.avg*100)%100,
+			  ESP.getFreeHeap(), Brightness.value());
 	}
 
 	if (Serial.available())
@@ -347,16 +378,6 @@ void loop()
 			Serial.printf("Unknown command '%c'\r\n", incoming);
 			break;
 		}
-	}
-
-	if (telnetServer.hasClient())
-	{
-		if(telnetClient.connected())
-		{
-			telnetClient.stop();
-		}
-		telnetClient = telnetServer.available();
-		telnetClient.println("WordClock telnet server ready.");
 	}
 }
 // ./esptool.py --port /dev/tty.usbserial --baud 460800 write_flash --flash_size=8m 0 /var/folders/yh/bv744591099f3x24xbkc22zw0000gn/T/build006b1a55228a1b90dda210fcddb62452.tmp/test.ino.bin

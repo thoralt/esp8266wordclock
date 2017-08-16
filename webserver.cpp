@@ -384,6 +384,8 @@ void WebServerClass::handleGetMode()
 		mode = 2; break;
 	case DisplayMode::flyingLettersVerticalDown:
 		mode = 3; break;
+	case DisplayMode::explode:
+		mode = 4; break;
 	default:
 		mode = 0; break;
 	}
@@ -567,6 +569,7 @@ void WebServerClass::handleSetColor()
 	this->extractColor("bg", Config.bg);
 	this->extractColor("s", Config.s);
 	this->server->send(200, "text/plain", "OK");
+	Config.saveDelayed();
 }
 
 //---------------------------------------------------------------------------------------

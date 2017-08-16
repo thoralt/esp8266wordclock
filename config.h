@@ -47,7 +47,7 @@ typedef struct _config_struct
 enum class DisplayMode
 {
 	plain, fade, flyingLettersVerticalUp, flyingLettersVerticalDown, explode,
-	random, matrix, heart, stars, red, green, blue,
+	random, matrix, heart, fire, plasma, stars, red, green, blue,
 	yellowHourglass, greenHourglass, update, updateComplete, updateError,
 	wifiManager, invalid
 };
@@ -60,6 +60,7 @@ public:
 	virtual ~ConfigClass();
 	void begin();
 	void save();
+	void saveDelayed();
 	void load();
 	void reset();
 
@@ -71,11 +72,14 @@ public:
 	bool heartbeat = true;
 	bool debugMode = false;
 
-	DisplayMode defaultMode = DisplayMode::flyingLettersVerticalUp;
+	DisplayMode defaultMode = DisplayMode::explode;
 
 	int updateProgress = 0;
 	int hourglassState = 0;
 	int timeZone = 0;
+
+	int delayedWriteTimer = 0;
+	bool delayedWriteFlag = false;
 
 private:
 	// copy of EEPROM content
